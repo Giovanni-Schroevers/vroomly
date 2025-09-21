@@ -1,0 +1,68 @@
+@startuml
+abstract class Vehicle {
+    - year: String
+    - brand: String
+    - model: String
+    - licensePlate: String
+    - MOTValidTill: Date
+    - isRentable: Boolean
+    - maintenances: List<Maintenance>
+    - reservations: List<Reservation>
+    - owner: User
+    + reserve(): Reservation
+    + addMaintenance(maintenance: Maintenance): Boolean
+}
+
+class RentableVehicles {
+    + getVehicles(filters): List<Vehicle>
+}
+
+class Maintenance {
+    - startDate: Date
+    - endDate: Date
+    - cost: Double
+}
+
+class User {
+    - firstName: String
+    - middleName: String
+    - lastName: String
+    - dob: Date
+    - userName: String
+    - password: String
+    - accountCreatedAt: DateTime
+    - email: String
+    - reservations: List<Reservation>
+}
+
+class Reservation {
+    - vehicle: Vehicle
+    - renter: User
+    - startDate: Date
+    - endDate: Date
+    - totalCost: Double
+    cancelReservation(): Boolean
+}
+
+class Car extends Vehicle {
+    +type: EngineType {readOnly}
+}
+
+class Image {
+    - source: String
+}
+
+enum EngineType {
+    ICE
+    BEV
+    FCEV
+}
+
+interface iLocatable{
+    - latitude
+    - longitude
+}
+
+Car ..> EngineType : uses
+
+@enduml

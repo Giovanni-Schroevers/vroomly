@@ -1,0 +1,163 @@
+
+@startuml
+left to right direction
+'skinparam classAttributeIconSize 0
+
+'========================
+' Core domain
+'========================
+abstract class Vehicle {
+  - year: String
+  - brand: String
+  - model: String
+  - licensePlate: String
+  - vin: String
+  - MOTValidTill: Date
+  - odometerKm: Double
+  - seats: Int
+  - color: String
+  - status: VehicleStatus
+  - category: VehicleCategory
+  - costPerDay: Double
+  {derived} - isRentable: Boolean
+  + reserve(renter: User, start: Date, end: Date): Reservation
+  + addMaintenance(m: Maintenance): Boolean
+  + isAvailable(start: Date, end: Date): Boolean
+}
+
+class Car {
+  + type: EngineType {readOnly}
+}
+
+class Maintenance {
+  - startDate: Date
+  - endDate: Date
+  - cost: Double
+  - description: String
+  - odometerAtService: Double
+}
+
+class Reservation {
+  - startDate: Date
+  - endDate: Date
+  - totalCost: Double
+  - status: ReservationStatus
+  - createdAt: DateTime
+  + cancelReservation(): Boolean
+}
+
+class User {
+  - firstName: String
+  - middleName: String
+  - lastName: String
+  - dob: Date
+  - userName: String
+  - password: String
+  - accountCreatedAt: DateTime
+  - email: String
+}
+
+class Image {
+  - source: String
+  - caption: String
+  - createdAt: DateTime
+}
+
+class Payment {
+  - amount: Double
+  - currency: String
+  - method: PaymentMethod
+  - status: PaymentStatus
+  - paidAt: DateTime
+}
+
+interface iLocatable {
+  + latitude: Decimal
+  + longitude: Decimal
+}
+
+class RentableVehicles <<service>> {
+  + getVehicles(filters): List<Vehicle>
+}
+
+class Location {
+  + latitude: Decimal
+  + longitude: Decimal
+  - address: String
+}
+
+'========================
+' Enums
+'========================
+enum EngineType {
+  ICE
+  BEV
+  FCEV
+}
+
+enum VehicleStatus {
+  Active
+  InService
+  InMaintenance
+  Decommissioned
+}
+
+enum VehicleCategory {
+  Car
+  Van
+  Truck
+  SUV
+}
+
+enum ReservationStatus {
+  Pending
+  Confirmed
+  Active
+  Completed
+  Cancelled
+}
+
+enum PaymentMethod {
+  Card
+  SEPA
+  Cash
+  Wallet
+}
+
+enum PaymentStatus {
+  Pending
+  Authorized
+  Captured
+  Refunded
+  Failed
+}
+
+'========================
+' Associations (lines)
+'========================
+Car --|> Vehicle
+Car ..> EngineType : type
+
+Vehicle *-- "0..*" Maintenance : maintenances
+Vehicle o-- "0..*" Reservation : reservations
+Vehicle o-- "0..*" Image : images
+Vehicle --> "1" User : owner
+Vehicle ..|> iLocatable
+Vehicle --> "0..1" Location : currentLocation
+
+Reservation --> "1" Vehicle : vehicle
+Reservation --> "1" User : renter
+Reservation o-- "0..*" Payment : payments
+
+RentableVehicles ..> Vehicle : queries
+
+'========================
+' Enum dependencies (lines from classes to enums)
+'========================
+Vehicle ..> VehicleStatus : status
+Vehicle ..> VehicleCategory : category
+Reservation ..> ReservationStatus : status
+Payment ..> PaymentMethod : method
+Payment ..> PaymentStatus : status
+
+@enduml

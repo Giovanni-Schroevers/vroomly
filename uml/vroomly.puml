@@ -7,26 +7,29 @@ left to right direction
 ' Core domain
 '========================
 abstract class Vehicle {
-  - year: String
-  - brand: String
-  - model: String
-  - licensePlate: String
-  - vin: String
-  - MOTValidTill: Date
-  - odometerKm: Double
-  - seats: Int
-  - color: String
-  - status: VehicleStatus
-  - category: VehicleCategory
-  - costPerDay: Double
+  # year: String
+  # brand: String
+  # model: String
+  # licensePlate: String
+  # vin: String
+  # MOTValidTill: Date
+  # odometerKm: Double
+  # seats: Int
+  # color: String
+  # status: VehicleStatus
+  # category: VehicleCategory
+  # costPerDay: Double
+'  Replace for interface
+  - createdAt: DateTime
   {derived} - isRentable: Boolean
   + reserve(renter: User, start: Date, end: Date): Reservation
   + addMaintenance(m: Maintenance): Boolean
   + isAvailable(start: Date, end: Date): Boolean
+  + remove(): Boolean
 }
 
 class Car {
-  + type: EngineType {readOnly}
+  - type: EngineType
 }
 
 class Maintenance {
@@ -35,14 +38,18 @@ class Maintenance {
   - cost: Double
   - description: String
   - odometerAtService: Double
+  + getMaintenanceDetails(): Object
 }
 
 class Reservation {
-  - startDate: Date
-  - endDate: Date
-  - totalCost: Double
-  - status: ReservationStatus
+  # startDate: Date
+  # endDate: Date
+  # totalCost: Double
+  # status: ReservationStatus
+  - paid: Boolean
+'  Replace for interface
   - createdAt: DateTime
+  + payReservation(): Boolean
   + cancelReservation(): Boolean
 }
 
@@ -53,8 +60,12 @@ class User {
   - dob: Date
   - userName: String
   - password: String
+'  Replace for interface
   - accountCreatedAt: DateTime
   - email: String
+  + login(): String
+  + resetPassword(): Boolean
+  + removeAccount(): Boolean
 }
 
 class Image {
@@ -63,17 +74,13 @@ class Image {
   - createdAt: DateTime
 }
 
-class Payment {
-  - amount: Double
-  - currency: String
-  - method: PaymentMethod
-  - status: PaymentStatus
-  - paidAt: DateTime
-}
-
 interface iLocatable {
   + latitude: Decimal
   + longitude: Decimal
+}
+
+interface iCreatedAt {
+    createdAt: DateTime
 }
 
 class RentableVehicles <<service>> {
@@ -99,7 +106,6 @@ enum VehicleStatus {
   Active
   InService
   InMaintenance
-  Decommissioned
 }
 
 enum VehicleCategory {
@@ -117,21 +123,6 @@ enum ReservationStatus {
   Cancelled
 }
 
-enum PaymentMethod {
-  Card
-  SEPA
-  Cash
-  Wallet
-}
-
-enum PaymentStatus {
-  Pending
-  Authorized
-  Captured
-  Refunded
-  Failed
-}
-
 '========================
 ' Associations (lines)
 '========================
@@ -147,9 +138,8 @@ Vehicle --> "0..1" Location : currentLocation
 
 Reservation --> "1" Vehicle : vehicle
 Reservation --> "1" User : renter
-Reservation o-- "0..*" Payment : payments
 
-RentableVehicles ..> Vehicle : queries
+RentableVehicles ..> Car : queries
 
 '========================
 ' Enum dependencies (lines from classes to enums)
@@ -157,7 +147,5 @@ RentableVehicles ..> Vehicle : queries
 Vehicle ..> VehicleStatus : status
 Vehicle ..> VehicleCategory : category
 Reservation ..> ReservationStatus : status
-Payment ..> PaymentMethod : method
-Payment ..> PaymentStatus : status
 
 @enduml

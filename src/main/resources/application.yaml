@@ -1,0 +1,6 @@
+ktor:
+    application:
+        modules:
+            - com.fsa_profgroep_4.ApplicationKt.graphQLModule
+    deployment:
+        port: 8080

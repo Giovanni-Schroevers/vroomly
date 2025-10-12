@@ -3,6 +3,7 @@ package com.fsa_profgroep_4
 import com.fsa_profgroep_4.types.Greeting
 import com.expediagroup.graphql.server.ktor.*
 import com.expediagroup.graphql.server.operations.Query
+import com.fsa_profgroep_4.modules.*
 import com.fsa_profgroep_4.ui.GraphiQLPage
 import io.ktor.http.ContentType
 import io.ktor.server.application.*
@@ -17,6 +18,12 @@ fun main(args: Array<String>) {
 // Example query
 class GreetingQuery: Query {
     fun greet(name: String): Greeting = Greeting(greeting = "Hello, $name!", name = name)
+}
+
+fun Application.module() {
+    authModule()
+    reservationModule()
+    vehicleModule()
 }
 
 fun Application.graphQLModule() {

@@ -3,6 +3,7 @@ package com.fsa_profgroep_4
 import com.fsa_profgroep_4.types.Greeting
 import com.expediagroup.graphql.server.ktor.*
 import com.expediagroup.graphql.server.operations.Query
+import com.fsa_profgroep_4.modules.*
 import com.fsa_profgroep_4.ui.GraphiQLPage
 import io.ktor.http.ContentType
 import io.ktor.server.application.*
@@ -19,28 +20,10 @@ class GreetingQuery: Query {
     fun greet(name: String): Greeting = Greeting(greeting = "Hello, $name!", name = name)
 }
 
-fun Application.graphQLModule() {
-    install(GraphQL) {
-        schema {
-            packages = listOf("com.fsa_profgroep_4")
-            queries = listOf(
-                GreetingQuery()
-            )
-        }
-    }
+fun Application.module() {
+    authModule()
+    reservationModule()
+    vehicleModule()
 
-    routing {
-        graphQLPostRoute()
-        graphQLGetRoute()
-        graphQLSDLRoute()
-
-        get("/playground") {
-            call.respondText(GraphiQLPage.html(endpoint = "/graphql"), ContentType.Text.Html)
-        }
-
-    }
-
-    install(StatusPages) {
-        defaultGraphQLStatusPages()
-    }
+    graphQLModule()
 }

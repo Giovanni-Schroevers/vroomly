@@ -24,30 +24,6 @@ fun Application.module() {
     authModule()
     reservationModule()
     vehicleModule()
-}
 
-fun Application.graphQLModule() {
-    install(GraphQL) {
-        schema {
-            packages = listOf("com.fsa_profgroep_4")
-            queries = listOf(
-                GreetingQuery()
-            )
-        }
-    }
-
-    routing {
-        graphQLPostRoute()
-        graphQLGetRoute()
-        graphQLSDLRoute()
-
-        get("/playground") {
-            call.respondText(GraphiQLPage.html(endpoint = "/graphql"), ContentType.Text.Html)
-        }
-
-    }
-
-    install(StatusPages) {
-        defaultGraphQLStatusPages()
-    }
+    graphQLModule()
 }

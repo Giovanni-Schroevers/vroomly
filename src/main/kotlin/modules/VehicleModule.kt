@@ -7,10 +7,10 @@ import io.ktor.server.routing.*
 
 fun Application.vehicleModule(){
     routing {
-        route("/api/vehicle/owner") {
+        route("/graphql/vehicle/owner") {
             vehicleOwnerRoute()
         }
-        route("/api/vehicle/renter") {
+        route("/graphql/vehicle/renter") {
             vehicleRenterRoute()
         }
     }

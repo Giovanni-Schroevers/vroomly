@@ -6,7 +6,7 @@ import io.ktor.server.routing.*
 
 fun Application.reservationModule(){
     routing {
-        route("/api/reservation") {
+        route("/graphql/reservation") {
             reservationModule()
         }
     }

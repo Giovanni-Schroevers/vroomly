@@ -6,7 +6,7 @@ import io.ktor.server.routing.*
 
 fun Application.authModule(){
     routing {
-        route("/api/auth") {
+        route("/graphql/auth") {
             authRoute()
         }
     }

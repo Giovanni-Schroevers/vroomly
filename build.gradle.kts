@@ -18,4 +18,6 @@ dependencies {
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     implementation("com.expediagroup", "graphql-kotlin-ktor-server", "9.0.0-alpha.4")
+    implementation("io.ktor:ktor-server-auth:3.3.0")
+    implementation("io.ktor:ktor-server-auth-jwt:3.3.0")
 }

@@ -1,12 +1,16 @@
 package com.fsa_profgroep_4
 
 import com.expediagroup.graphql.generator.extensions.plus
+import com.expediagroup.graphql.generator.hooks.SchemaGeneratorHooks
 import com.expediagroup.graphql.server.ktor.*
+import com.fsa_profgroep_4.auth.AuthMutation
 import com.fsa_profgroep_4.auth.AuthQuery
 import com.fsa_profgroep_4.example.ExampleQuery
 import com.fsa_profgroep_4.reservations.ReservationsQuery
 import com.fsa_profgroep_4.vehicles.VehiclesQuery
 import graphql.GraphQLContext
+import graphql.scalars.ExtendedScalars
+import graphql.schema.GraphQLType
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.routing.*
@@ -18,6 +22,7 @@ import io.ktor.server.auth.principal
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.ApplicationRequest
+import kotlin.reflect.KType
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
@@ -45,6 +50,17 @@ fun Application.graphQLModule(){
                 ReservationsQuery(),
                 VehiclesQuery()
             )
+            mutations = listOf(
+                AuthMutation(environment),
+            )
+            hooks = object : SchemaGeneratorHooks {
+                override fun willGenerateGraphQLType(type: KType): GraphQLType? =
+                    when (type.classifier) {
+                        java.time.LocalDate::class -> ExtendedScalars.Date
+                        java.time.OffsetDateTime::class -> ExtendedScalars.DateTime
+                        else -> null
+                    }
+            }
         }
         server {
             contextFactory = CustomGraphQLContextFactory()

@@ -1,7 +1,8 @@
 package com.fsa_profgroep_4.auth
 
+import com.expediagroup.graphql.server.operations.Mutation
 import com.expediagroup.graphql.server.operations.Query
-import com.fsa_profgroep_4.auth.types.Login.*
+import com.fsa_profgroep_4.auth.types.*
 import graphql.GraphQLException
 import io.ktor.server.application.ApplicationEnvironment
 

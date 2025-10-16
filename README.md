@@ -20,16 +20,16 @@ Here's a list of features included in this project:
 
 To build or run the project, use one of the following tasks:
 
-| Task                          | Description                                                          |
-|-------------------------------|----------------------------------------------------------------------|
-| `./gradlew test`              | Run the tests                                                        |
-| `./gradlew build`             | Build everything                                                     |
-| `buildFatJar`                 | Build an executable JAR of the server with all dependencies included |
-| `buildImage`                  | Build the docker image to use with the fat JAR                       |
-| `publishImageToLocalRegistry` | Publish the docker image locally                                     |
-| `run`                         | Run the server                                                       |
-| `runDocker`                   | Run using the local docker image                                     |
-| `:buildFatJar`                | Builds a .jar file for aws deployments                               |
+| Task                                    | Description                                                          |
+|-----------------------------------------|----------------------------------------------------------------------|
+| `./gradlew test`                        | Run the tests                                                        |
+| `./gradlew build`                       | Build everything                                                     |
+| `./gradlew buildFatJar`                 | Build an executable JAR of the server with all dependencies included |
+| `./gradlew buildImage`                  | Build the docker image to use with the fat JAR                       |
+| `./gradlew publishImageToLocalRegistry` | Publish the docker image locally                                     |
+| `./gradlew run`                         | Run the server                                                       |
+| `./gradlew runDocker`                   | Run using the local docker image                                     |
+| `./gradlew :buildFatJar`                | Builds a .jar file for aws deployments                               |
 
 If the server starts successfully, you'll see the following output:
 

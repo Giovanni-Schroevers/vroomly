@@ -25,4 +25,8 @@ dependencies {
     implementation("io.ktor:ktor-server-auth:3.3.0")
     implementation("io.ktor:ktor-server-auth-jwt:3.3.0")
     implementation("com.graphql-java:graphql-java-extended-scalars:18.2")
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.datetime)
+    implementation("org.postgresql:postgresql:42.7.3")
 }

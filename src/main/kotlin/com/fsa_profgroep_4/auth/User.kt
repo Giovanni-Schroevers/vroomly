@@ -15,6 +15,6 @@ data class User (
     val middleName: String?,
     val lastname: String,
     val dateOfBirth: LocalDate,
-    val id: UUID = UUID.randomUUID(),
+    val id: Int = 0,
     val createdAt: Instant = Clock.System.now(),
 )

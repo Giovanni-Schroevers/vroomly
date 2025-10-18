@@ -8,7 +8,7 @@ data class Vehicle (
     val id: String,
     @param:GraphQLDescription("Vehicle owner's unique id")
     val ownerId: String,
-    // add id and owner id to uml?
+    // TODO add id and owner id to UML
     @param:GraphQLDescription("Vehicle's brand")
     val brand: String,
     @param:GraphQLDescription("Vehicle's model")
@@ -27,9 +27,15 @@ data class Vehicle (
     val color: String,
     @param:GraphQLDescription("Vehicle current status")
     val status: VehicleStatus,
-//    val category: VehicleCategory,
+    @param:GraphQLDescription("Vehicle category/type")
+    val category: VehicleCategory,
     @param:GraphQLDescription("Vehicle's cost per day to rent")
     val costPerDay: Double,
+    @param:GraphQLDescription("Vehicle's engine type")
+    val engineType: EngineType,
+    // TODO: Add reviewStars to UML
+    @param:GraphQLDescription("Average review stars for this vehicle")
+    val reviewStars: Double
 )
 @GraphQLDescription("Types of vehicle status")
 enum class VehicleStatus {
@@ -41,5 +47,25 @@ enum class VehicleStatus {
     MAINTENANCE,
     @GraphQLDescription("Vehicle is permanently removed from operation")
     DECOMMISSIONED
+}
+
+// TODO: Change the UML to match this VehicleCategory enum
+enum class VehicleCategory {
+    SEDAN,
+    SUV,
+    HATCHBACK,
+    CONVERTIBLE,
+    COUPE,
+    WAGON,
+    VAN,
+    TRUCK
+}
+
+// TODO: Change the UML to match this EngineType enum
+enum class EngineType {
+    PETROL,
+    DIESEL,
+    ELECTRIC,
+    HYBRID
 }
 

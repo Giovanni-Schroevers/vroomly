@@ -1,10 +1,10 @@
 package com.fsa_profgroep_4.vehicles
+
 import com.fsa_profgroep_4.vehicles.types.*
-import java.time.LocalDate
 import kotlin.String
 
 class VehicleService {
-    private val mockVehicles = listOf(
+   /*private var mockVehicles = listOf(
         Vehicle(
             id = "1",
             ownerId = "owner1",
@@ -47,7 +47,10 @@ class VehicleService {
             status = VehicleStatus.MAINTENANCE,
             costPerDay = 75.0
         ),
-    )
+    ) */
+
+    private val mockVehicles: List<Vehicle> = VehicleHelper.generateMockVehicles(100)
+    private val mockImages: List<VehicleImage> = VehicleHelper.generateMockVehicleImages(mockVehicles)
 
     suspend fun getAllVehiclesByOwner(ownerId: String): List<Vehicle> {
         return mockVehicles.filter { it.ownerId == ownerId }
@@ -55,5 +58,30 @@ class VehicleService {
 
     suspend fun getVehicleById(id: String): Vehicle {
         return mockVehicles.first { it.id == id }
+    }
+
+    suspend fun getBasicVehicleInfoById(ids: List<String>): BasicVehicleInfo {
+        val vehicles = mockVehicles.filter { it.id in ids }
+
+        val basics = vehicles.map { vehicle ->
+            VehicleBasic(
+                id = vehicle.id,
+                ownerId = vehicle.ownerId,
+                brand = vehicle.brand,
+                costPerDay = vehicle.costPerDay,
+                engineType = vehicle.engineType,
+                reviewStars = vehicle.reviewStars
+            )
+        }
+
+        val images = vehicles.map { vehicle ->
+            mockImages.first { it.vehicleId == vehicle.id }
+        }
+
+        return BasicVehicleInfo(basics = basics, images = images)
+    }
+
+    suspend fun getAllVehicles(): List<Vehicle> {
+        return mockVehicles
     }
 }

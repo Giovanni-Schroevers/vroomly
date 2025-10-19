@@ -45,7 +45,7 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
                     result[UsersTable.lastName],
                     result[UsersTable.dateOfBirth].toJavaLocalDate(),
                     result[UsersTable.id],
-                    result[UsersTable.creationDate].toInstant(TimeZone.Companion.UTC),
+                    result[UsersTable.creationDate].toInstant(TimeZone.currentSystemDefault()),
                 )
             }
         }
@@ -66,7 +66,7 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
                 if (user.middleName != null) it[middleName] = user.middleName
                 it[lastName] = user.lastname
                 it[dateOfBirth] = user.dateOfBirth.toKotlinLocalDate()
-                it[creationDate] = user.createdAt.toLocalDateTime(TimeZone.Companion.UTC)
+                it[creationDate] = user.createdAt.toLocalDateTime(TimeZone.currentSystemDefault())
             } get UsersTable.id
         }
 

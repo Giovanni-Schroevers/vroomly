@@ -5,9 +5,9 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 @GraphQLDescription("Basic information for vehicles owned by owner (verhuurder)")
 data class VehicleBasic (
     @param:GraphQLDescription("Vehicle unique id")
-    val id: String,
+    val id: Int,
     @param:GraphQLDescription("Vehicle owner's unique id")
-    val ownerId: String,
+    val ownerId: Int,
     @param:GraphQLDescription("Vehicle's brand")
     val brand: String,
     @param:GraphQLDescription("Vehicle's cost per day to rent")

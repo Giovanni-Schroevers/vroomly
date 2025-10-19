@@ -12,7 +12,7 @@ class VehiclesQuery: Query {
     @GraphQLDescription("Get all vehicles from a specific vehicle owner")
     suspend fun vehiclesByOwnerId(
         @GraphQLDescription("Vehicle owner (verhuurder) id")
-        ownerId: String
+        ownerId: Int
     ): List<Vehicle> {
         return vehicleService.getAllVehiclesByOwner(ownerId)
     }
@@ -20,7 +20,7 @@ class VehiclesQuery: Query {
     @GraphQLDescription("Get detailed info about a specific vehicle")
     suspend fun vehicle(
         @GraphQLDescription("Vehicle Id")
-        id: String
+        id: Int
     ): Vehicle {
         return vehicleService.getVehicleById(id)
     }

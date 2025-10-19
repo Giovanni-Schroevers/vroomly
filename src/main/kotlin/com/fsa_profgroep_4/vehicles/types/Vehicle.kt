@@ -5,14 +5,16 @@ import java.time.LocalDate
 @GraphQLDescription("Vehicles owned by owner (verhuurder)")
 data class Vehicle (
     @param:GraphQLDescription("Vehicle unique id")
-    val id: String,
+    val id: Int,
     @param:GraphQLDescription("Vehicle owner's unique id")
-    val ownerId: String,
+    val ownerId: Int,
     // TODO add id and owner id to UML
     @param:GraphQLDescription("Vehicle's brand")
     val brand: String,
     @param:GraphQLDescription("Vehicle's model")
     val model: String,
+    @param:GraphQLDescription("Vehicle's build year")
+    val year: Int,
     @param:GraphQLDescription("Vehicle's license plate")
     val licensePlate: String,
     @param:GraphQLDescription("Vehicle's vin")

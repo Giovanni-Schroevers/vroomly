@@ -15,9 +15,9 @@ object VehicleModelTable : Table("dbo.vehicle_model") {
     val brand = varchar("brand", 100)
     val model = varchar("model", 100)
     val year = integer("year")
-    val category = varchar("category", 50).nullable()
-    val seats = integer("seats").nullable()
-    val engineTypeId = reference("engine_type_id", EngineTypeTable.id).nullable()
+    val category = varchar("category", 50)
+    val seats = integer("seats")
+    val engineTypeId = integer("engine_type_id").references(EngineTypeTable.id)
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -26,7 +26,7 @@ object VehicleTable : Table("dbo.vehicle") {
     val licensePlate = varchar("license_plate", 20).uniqueIndex()
     val status = varchar("status", 50)
     val vin = varchar("vin", 20).uniqueIndex()
-    val vehicleModelId = reference("vehicle_model_id", VehicleModelTable.id).nullable()
+    val vehicleModelId = reference("vehicle_model_id", VehicleModelTable.id)
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -45,24 +45,24 @@ object UsersTable : Table("dbo.users") {
 
 object OwnershipTable : Table("dbo.ownership") {
     val id = integer("id").autoIncrement()
-    val userId = reference("user_id", UsersTable.id).nullable()
-    val vehicleId = reference("vehicle_id", VehicleTable.id).nullable()
+    val userId = reference("user_id", UsersTable.id)
+    val vehicleId = reference("vehicle_id", VehicleTable.id)
     override val primaryKey = PrimaryKey(id)
 }
 
 object OdometerTable : Table("dbo.odometer") {
     val id = integer("id").autoIncrement()
-    val vehicleId = reference("vehicle_id", VehicleTable.id).nullable()
+    val vehicleId = reference("vehicle_id", VehicleTable.id)
     val date = datetime("date")
-    val mileage = decimal("mileage", 10, 2).nullable()
+    val mileage = decimal("mileage", 10, 2)
     override val primaryKey = PrimaryKey(id)
 }
 
 object LocationTable : Table("dbo.location") {
     val id = integer("id").autoIncrement()
-    val vehicleId = reference("vehicle_id", VehicleTable.id).nullable()
-    val latitude = decimal("latitude", 10, 6).nullable()
-    val longitude = decimal("longitude", 10, 6).nullable()
+    val vehicleId = reference("vehicle_id", VehicleTable.id)
+    val latitude = decimal("latitude", 10, 6)
+    val longitude = decimal("longitude", 10, 6)
     val date = datetime("date").defaultExpression(CurrentDateTime)
     override val primaryKey = PrimaryKey(id)
 }
@@ -71,29 +71,29 @@ object PaymentTable : Table("dbo.payment") {
     val id = integer("id").autoIncrement()
     val amount = decimal("amount", 10, 2)
     val currency = varchar("currency", 10)
-    val paymentMethod = varchar("payment_method", 50).nullable()
-    val status = varchar("status", 50).nullable()
+    val paymentMethod = varchar("payment_method", 50)
+    val status = varchar("status", 50)
     val paymentDate = datetime("payment_date").defaultExpression(CurrentDateTime)
     override val primaryKey = PrimaryKey(id)
 }
 
 object ReservationTable : Table("dbo.reservation") {
     val id = integer("id").autoIncrement()
-    val userId = reference("user_id", UsersTable.id).nullable()
-    val vehicleId = reference("vehicle_id", VehicleTable.id).nullable()
+    val userId = reference("user_id", UsersTable.id)
+    val vehicleId = reference("vehicle_id", VehicleTable.id)
     val startDate = datetime("start_date")
     val endDate = datetime("end_date")
-    val status = varchar("status", 50).nullable()
-    val paymentId = reference("payment_id", PaymentTable.id).nullable()
+    val status = varchar("status", 50)
+    val paymentId = reference("payment_id", PaymentTable.id)
     override val primaryKey = PrimaryKey(id)
 }
 
 object MaintenanceTable : Table("dbo.maintenance") {
     val id = integer("id").autoIncrement()
-    val vehicleId = reference("vehicle_id", VehicleTable.id).nullable()
+    val vehicleId = reference("vehicle_id", VehicleTable.id)
     val startDate = date("start_date")
     val endDate = date("end_date").nullable()
-    val cost = decimal("cost", 10, 2).nullable()
-    val description = text("description").nullable()
+    val cost = decimal("cost", 10, 2)
+    val description = text("description")
     override val primaryKey = PrimaryKey(id)
 }

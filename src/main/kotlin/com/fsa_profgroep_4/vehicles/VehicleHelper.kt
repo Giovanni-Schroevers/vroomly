@@ -39,7 +39,8 @@ object VehicleHelper {
                 costPerDay = (30..120).random().toDouble(),
                 engineType = if (index % 2 == 0) com.fsa_profgroep_4.vehicles.types.EngineType.PETROL else com.fsa_profgroep_4.vehicles.types.EngineType.DIESEL,
                 category = VehicleCategory.entries.toTypedArray().random(),
-                reviewStars = listOf(3.5, 4.0, 4.5, 5.0).random()
+                reviewStars = listOf(3.5, 4.0, 4.5, 5.0).random(),
+                year = (2020..2025).random()
             )
         }
     }

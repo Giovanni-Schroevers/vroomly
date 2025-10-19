@@ -2,6 +2,7 @@ package com.fsa_profgroep_4.repository.postgresql
 
 import com.fsa_profgroep_4.auth.User
 import com.fsa_profgroep_4.auth.hash
+import com.fsa_profgroep_4.auth.types.EditInput
 import com.fsa_profgroep_4.auth.verify
 import com.fsa_profgroep_4.repository.UsersTable
 import com.fsa_profgroep_4.repository.UserRepository
@@ -54,7 +55,6 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
 
     @OptIn(ExperimentalTime::class)
     override suspend fun register(user: User): User {
-
         var userId = user.id
 
         transaction(database) {
@@ -71,5 +71,50 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
         }
 
         return user.copy(id = userId)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    override suspend fun update(email: String, input: EditInput): User {
+        var updated: User? = null
+        transaction(database) {
+            val result: ResultRow? = UsersTable.updateReturning(
+                returning = listOf(
+                    UsersTable.id,
+                    UsersTable.username,
+                    UsersTable.email,
+                    UsersTable.password,
+                    UsersTable.firstName,
+                    UsersTable.middleName,
+                    UsersTable.lastName,
+                    UsersTable.dateOfBirth,
+                    UsersTable.creationDate,
+                ),
+                where = { UsersTable.email eq email }
+            ) {
+                if (input.username != null) it[username] = input.username
+                if (input.password != null) it[password] = hash(input.password)
+                if (input.firstname != null) it[firstName] = input.firstname
+                if (input.middleName != null) it[middleName] = input.middleName
+                if (input.lastname != null) it[lastName] = input.lastname
+                if (input.dob != null) it[dateOfBirth] = input.dob.toKotlinLocalDate()
+            }.singleOrNull()
+
+            if (result == null) {
+                error("User with email '$email' not found")
+            } else {
+                updated = User(
+                    result[UsersTable.username],
+                    result[UsersTable.email],
+                    result[UsersTable.password],
+                    result[UsersTable.firstName],
+                    result[UsersTable.middleName],
+                    result[UsersTable.lastName],
+                    result[UsersTable.dateOfBirth].toJavaLocalDate(),
+                    result[UsersTable.id],
+                    result[UsersTable.creationDate].toInstant(TimeZone.currentSystemDefault()),
+                )
+            }
+        }
+        return updated!!
     }
 }

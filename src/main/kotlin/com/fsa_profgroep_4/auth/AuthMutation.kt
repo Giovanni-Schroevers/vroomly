@@ -34,4 +34,36 @@ class AuthMutation(environment: ApplicationEnvironment): Mutation {
 
         return "Account for ${user.email} has successfully been created"
     }
+
+    @OptIn(ExperimentalTime::class)
+    suspend fun editUser(input: EditInput, env: DataFetchingEnvironment): EditResponse {
+        val token = requirePrincipal(env)
+        val email = token.payload.getClaim("email").asString()
+
+        if (input.username == null && input.password == null && input.firstname == null &&
+            input.middleName == null && input.lastname == null && input.dob == null
+        ) {
+            throw GraphQLException("No fields to update")
+        }
+
+        val repository = repositoryFactory.createUserRepository()
+
+        val updatedUser = try {
+            repository.update(email, input)
+        } catch (e: Exception) {
+            throw GraphQLException(e.message)
+        }
+
+        val userResponse = UserResponse(
+            id = updatedUser.id,
+            username = updatedUser.username,
+            email = updatedUser.email,
+            firstname = updatedUser.firstname,
+            middleName = updatedUser.middleName,
+            lastname = updatedUser.lastname,
+            dateOfBirth = updatedUser.dateOfBirth,
+        )
+
+        return EditResponse(user = userResponse)
+    }
 }

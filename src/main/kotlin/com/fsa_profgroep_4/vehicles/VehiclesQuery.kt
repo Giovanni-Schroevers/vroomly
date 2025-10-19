@@ -25,6 +25,8 @@ class VehiclesQuery: Query {
         return vehicleService.getVehicleById(id)
     }
 
+
+
     @GraphQLDescription("Get vehicles with optional filters and pagination")
     suspend fun searchVehicles(
         @GraphQLDescription("Filters to apply to the vehicles")

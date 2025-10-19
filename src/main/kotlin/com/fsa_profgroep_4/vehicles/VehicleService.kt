@@ -52,15 +52,15 @@ class VehicleService {
     private val mockVehicles: List<Vehicle> = VehicleHelper.generateMockVehicles(100)
     private val mockImages: List<VehicleImage> = VehicleHelper.generateMockVehicleImages(mockVehicles)
 
-    suspend fun getAllVehiclesByOwner(ownerId: String): List<Vehicle> {
+    suspend fun getAllVehiclesByOwner(ownerId: Int): List<Vehicle> {
         return mockVehicles.filter { it.ownerId == ownerId }
     }
 
-    suspend fun getVehicleById(id: String): Vehicle {
+    suspend fun getVehicleById(id: Int): Vehicle {
         return mockVehicles.first { it.id == id }
     }
 
-    suspend fun getBasicVehicleInfoById(ids: List<String>): BasicVehicleInfo {
+    suspend fun getBasicVehicleInfoById(ids: List<Int>): BasicVehicleInfo {
         val vehicles = mockVehicles.filter { it.id in ids }
 
         val basics = vehicles.map { vehicle ->

@@ -18,10 +18,10 @@ object VehicleHelper {
             val modelIndex = (index - 1) % models.size
             val colorIndex = (index - 1) % colors.size
             val status = statuses.random()
-            val ownerId = "owner${(index % 3) + 1}"
+            val ownerId = (index % 3) + 1
 
             Vehicle(
-                id = index.toString(),
+                id = index,
                 ownerId = ownerId,
                 brand = brands[brandIndex],
                 model = models[modelIndex],

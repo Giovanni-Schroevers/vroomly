@@ -8,7 +8,7 @@ data class VehicleImage (
     @param:GraphQLDescription("Image's unique id")
     val id: String,
     @param:GraphQLDescription("Image's vehicle unique id")
-    val vehicleId: String,
+    val vehicleId: Int,
     @param:GraphQLDescription("Path to the image resource")
     val path: String,
     @param:GraphQLDescription("Type of image ")

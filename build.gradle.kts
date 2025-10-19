@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.datetime)
     implementation("org.postgresql:postgresql:42.7.3")
+    implementation("at.favre.lib:bcrypt:0.10.2")
 }
 
 

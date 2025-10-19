@@ -2,7 +2,8 @@ package com.fsa_profgroep_4.auth
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import io.ktor.http.ContentType
+import com.fsa_profgroep_4.auth.types.LoginInput
+import com.fsa_profgroep_4.repository.UserRepository
 import io.ktor.server.application.ApplicationEnvironment
 import java.util.Date
 
@@ -17,11 +18,11 @@ class JwtService(
         jwtAudience = environment.config.property("jwt.audience").getString(),
     )
 
-    suspend fun authenticate(email: String, password: String): String? {
-        val foundUser = if(email == "test@avans.nl" && password == "test123") email else null
+    suspend fun authenticate(repository: UserRepository, input: LoginInput): Pair<String, User>? {
+        val foundUser = repository.findByCredentials(input.email, input.password)
 
         return if (foundUser !== null) {
-            createAccessToken(foundUser)
+            createAccessToken(foundUser.email) to foundUser
         } else null
     }
 

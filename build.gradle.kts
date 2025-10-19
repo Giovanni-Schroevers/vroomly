@@ -1,3 +1,26 @@
+import java.io.File
+
+
+fun loadDotEnv(): Map<String, String> {
+    val file = rootProject.file(".env")
+    if (!file.exists()) return emptyMap()
+
+    return file.readLines()
+        .map(String::trim)
+        .filter { it.isNotEmpty() && !it.startsWith("#") && it.contains("=") }
+        .associate { line ->
+            val idx = line.indexOf("=")
+            val key = line.substring(0, idx).trim()
+            var value = line.substring(idx + 1).trim()
+            if ((value.startsWith("\"") && value.endsWith("\"")) ||
+                (value.startsWith("'") && value.endsWith("'"))
+            ) {
+                value = value.substring(1, value.length - 1)
+            }
+            key to value
+        }
+}
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
@@ -29,4 +52,13 @@ dependencies {
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.datetime)
     implementation("org.postgresql:postgresql:42.7.3")
+}
+
+
+tasks.named<JavaExec>("run") {
+    environment(loadDotEnv())
+
+    doFirst {
+        println("Loaded .env entries: ${loadDotEnv().keys}")
+    }
 }

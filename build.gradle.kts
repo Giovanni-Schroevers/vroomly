@@ -44,6 +44,9 @@ dependencies {
     implementation(libs.ktor.server.core)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     implementation("com.expediagroup", "graphql-kotlin-ktor-server", "9.0.0-alpha.4")
     implementation("io.ktor:ktor-server-auth:3.3.0")
     implementation("io.ktor:ktor-server-auth-jwt:3.3.0")
@@ -62,4 +65,9 @@ tasks.named<JavaExec>("run") {
     doFirst {
         println("Loaded .env entries: ${loadDotEnv().keys}")
     }
+}
+
+// Configure tests to use JUnit Platform (JUnit 5)
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

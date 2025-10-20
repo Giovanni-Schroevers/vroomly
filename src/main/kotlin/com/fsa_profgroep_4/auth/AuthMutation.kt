@@ -1,20 +1,26 @@
 package com.fsa_profgroep_4.auth
 
 import com.expediagroup.graphql.server.operations.Mutation
-import com.fsa_profgroep_4.auth.types.*
+import com.fsa_profgroep_4.auth.types.EditInput
+import com.fsa_profgroep_4.auth.types.EditResponse
+import com.fsa_profgroep_4.auth.types.RegisterInput
+import com.fsa_profgroep_4.auth.types.UserResponse
 import com.fsa_profgroep_4.repository.RepositoryFactory
+import com.fsa_profgroep_4.repository.UserRepository
 import graphql.GraphQLException
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.server.application.ApplicationEnvironment
-import java.time.LocalDate
 import kotlin.time.ExperimentalTime
 
-class AuthMutation(environment: ApplicationEnvironment): Mutation {
-    private val repositoryFactory: RepositoryFactory = RepositoryFactory(environment)
+class AuthMutation(private val userRepository: UserRepository): Mutation {
+    constructor(environment: ApplicationEnvironment): this(RepositoryFactory(environment).createUserRepository())
 
     @OptIn(ExperimentalTime::class)
+    @Suppress("unused")
     suspend fun registerUser(input: RegisterInput): String {
-        val repository = repositoryFactory.createUserRepository()
+        val repository = userRepository
+
+        validateRegister(input)
 
         val user = User(
             username = input.username,
@@ -36,17 +42,14 @@ class AuthMutation(environment: ApplicationEnvironment): Mutation {
     }
 
     @OptIn(ExperimentalTime::class)
+    @Suppress("unused")
     suspend fun editUser(input: EditInput, env: DataFetchingEnvironment): EditResponse {
         val token = requirePrincipal(env)
         val email = token.payload.getClaim("email").asString()
 
-        if (input.username == null && input.password == null && input.firstname == null &&
-            input.middleName == null && input.lastname == null && input.dob == null
-        ) {
-            throw GraphQLException("No fields to update")
-        }
+        validateEdit(input)
 
-        val repository = repositoryFactory.createUserRepository()
+        val repository = userRepository
 
         val updatedUser = try {
             repository.update(email, input)

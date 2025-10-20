@@ -1,17 +1,26 @@
 package com.fsa_profgroep_4.auth
 
 import com.expediagroup.graphql.server.operations.Query
-import com.fsa_profgroep_4.auth.types.*
+import com.fsa_profgroep_4.auth.types.LoginInput
+import com.fsa_profgroep_4.auth.types.LoginResponse
+import com.fsa_profgroep_4.auth.types.UserResponse
 import com.fsa_profgroep_4.repository.RepositoryFactory
+import com.fsa_profgroep_4.repository.UserRepository
 import graphql.GraphQLException
 import io.ktor.server.application.ApplicationEnvironment
 
-class AuthQuery(private val environment: ApplicationEnvironment): Query {
-    private val repositoryFactory: RepositoryFactory = RepositoryFactory(environment)
-    private val jwtService: JwtService = JwtService(environment)
+class AuthQuery(
+    private val userRepository: UserRepository,
+    private val jwtService: JwtService
+): Query {
+    constructor(environment: ApplicationEnvironment): this(
+        RepositoryFactory(environment).createUserRepository(),
+        JwtService(environment)
+    )
 
+    @Suppress("unused")
     suspend fun login(input: LoginInput): LoginResponse {
-        val repository = repositoryFactory.createUserRepository()
+        val repository = userRepository
 
         val (token, user) = jwtService.authenticate(repository, input) ?: throw GraphQLException("Invalid username or password")
 

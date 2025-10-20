@@ -64,4 +64,12 @@ class VehiclesQuery: Query {
         return vehicleService.getBasicVehicleInfoById(ids)
     }
 
+    @GraphQLDescription("Calculate Total Cost of Ownership for a vehicle")
+    suspend fun vehicleTco(
+        @GraphQLDescription("TCO calculation input")
+        input: TcoInput
+    ): VehicleTco {
+        val vehicle = vehicleService.getVehicleById(input.id)
+        return vehicleService.calculateTco(input, vehicle)
+    }
 }

@@ -6,9 +6,9 @@ data class VehicleTco (
     @param:GraphQLDescription("Vehicle unique id")
     val id: Int,
     @param:GraphQLDescription("Purchase price of the vehicle")
-    val purchasePrice: Double,
+    val AcquisitionCost: Double,
     @param:GraphQLDescription("Current value value of the vehicle")
-    val currentValue: Double,
+    val currentMarketValue: Double,
     @param:GraphQLDescription("Total depreciation")
     val depreciation: Double,
     @param:GraphQLDescription("Total maintenance cost")
@@ -22,17 +22,19 @@ data class VehicleTco (
     @param:GraphQLDescription("TCO per kilometer")
     val costPerKilometer: Double,
     @param:GraphQLDescription("Number of years of ownership")
-    val yearOwned: Int,
-)
+    val yearsOwned: Int,
+    @param:GraphQLDescription("TCO Value")
+    val tcoValue: Double,
+    )
 
 @GraphQLDescription("Input for TCO calculation")
 data class TcoInput(
     @param:GraphQLDescription("Vehicle unique id")
-    val vehicleId: String,
+    val id: Int,
     @param:GraphQLDescription("Original purchase price")
-    val purchasePrice: Double,
+    val AcquisitionCost: Double,
     @param:GraphQLDescription("Current value value of the vehicle")
-    val currentValue: Double,
+    val currentMarketValue: Double,
     @param:GraphQLDescription("Total maintenance cost")
     val maintenanceCosts: Double,
     @param:GraphQLDescription("Average fuel consumption in liters per 100km")
@@ -44,5 +46,5 @@ data class TcoInput(
     @param:GraphQLDescription("Vehicle tax and registration costs per year")
     val taxAndRegistrationPerYear: Double,
     @param:GraphQLDescription("Number of years of ownership")
-    val yearsOwned: Double
+    val yearsOwned: Int,
 )

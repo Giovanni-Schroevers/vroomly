@@ -1,54 +1,10 @@
 package com.fsa_profgroep_4.vehicles
 
 import com.fsa_profgroep_4.vehicles.types.*
+import java.time.LocalDate
 import kotlin.String
 
 class VehicleService {
-   /*private var mockVehicles = listOf(
-        Vehicle(
-            id = "1",
-            ownerId = "owner1",
-            brand = "Toyota",
-            model = "Corolla",
-            licensePlate = "111-AA-11",
-            vin = "L1K23JLK1SS09DF1L2K",
-            motValidTill = LocalDate.of(2026, 12, 31).toString(),
-            odometerKm = 20000.0,
-            seats = 5,
-            color = "Silver",
-            status = VehicleStatus.ACTIVE,
-            costPerDay = 45.0
-        ),
-        Vehicle(
-            id = "2",
-            ownerId = "owner1",
-            brand = "Volkswagen",
-            model = "Golf",
-            licensePlate = "222-BB-22",
-            vin = "4L234B24JK23454K",
-            motValidTill = LocalDate.of(2025, 12, 31).toString(),
-            odometerKm = 15000.0,
-            seats = 5,
-            color = "White",
-            status = VehicleStatus.ACTIVE,
-            costPerDay = 50.0
-        ),
-        Vehicle(
-            id = "3",
-            ownerId = "owner2",
-            brand = "BMW",
-            model = "3 Series",
-            licensePlate = "333-CC-33",
-            vin = "2L3J423B4JK23L4J6K",
-            motValidTill = LocalDate.of(2026, 6, 20).toString(),
-            odometerKm = 27000.0,
-            seats = 5,
-            color = "Black",
-            status = VehicleStatus.MAINTENANCE,
-            costPerDay = 75.0
-        ),
-    ) */
-
     private val mockVehicles: List<Vehicle> = VehicleHelper.generateMockVehicles(100)
     private val mockImages: List<VehicleImage> = VehicleHelper.generateMockVehicleImages(mockVehicles)
 
@@ -83,5 +39,34 @@ class VehicleService {
 
     suspend fun getAllVehicles(): List<Vehicle> {
         return mockVehicles
+    }
+
+    suspend fun calculateTco(input: TcoInput, vehicle: Vehicle): VehicleTco {
+        val depreciation = input.AcquisitionCost - input.currentMarketValue
+
+        val totalKmDriven = vehicle.odometerKm
+        val fuelConsumed = (totalKmDriven / 100) * input.fuelConsumptionPer100Km
+        val fuelCosts = fuelConsumed * input.fuelPricePerLiter
+
+        val totalInsuranceCosts = input.insuranceCostsPerYear * input.yearsOwned
+
+        val totalTaxAndRegistration = input.taxAndRegistrationPerYear * input.yearsOwned
+
+        val totalCost = depreciation + input.maintenanceCosts + fuelCosts + totalInsuranceCosts + totalTaxAndRegistration
+        val costPerKm = if (totalKmDriven == 0.0) 0.0 else totalCost / totalKmDriven
+
+        return VehicleTco(
+            id = input.id,
+            AcquisitionCost = input.AcquisitionCost,
+            currentMarketValue = input.currentMarketValue,
+            depreciation = depreciation,
+            maintenanceCost = input.maintenanceCosts,
+            fuelCost = fuelCosts,
+            insuranceCostPerYear = input.insuranceCostsPerYear,
+            taxAndRegistrationPerYear = input.taxAndRegistrationPerYear,
+            costPerKilometer = costPerKm,
+            yearsOwned = input.yearsOwned,
+            tcoValue = totalCost
+        )
     }
 }

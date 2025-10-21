@@ -8,13 +8,23 @@ import kotlinx.coroutines.sync.withPermit
 class VehicleService {
     val semaphoreBulk = Semaphore(10) // max 10 concurrent inserts for seeding
     val semaphore = Semaphore(3) // max 3 concurrent reads/writes for normal operations
+
     /** ========================================================
      *                     CREATE FUNCTIONS
      *  ======================================================== */
 
+    suspend fun createVehicle(repository: VehicleRepository, vehicle: Vehicle): Vehicle {
+        semaphore.withPermit {
+            val createdVehicle = repository.saveVehicle(vehicle)
+            if (createdVehicle != null)
+                return createdVehicle
+        }
+        return null!!
+    }
     /** ========================================================
      *                      READ FUNCTIONS
      *  ======================================================== */
+
     suspend fun getAllVehicles(repository: VehicleRepository): List<Vehicle> {
         semaphore.withPermit {
             val foundVehicles = repository.getAllVehicles()

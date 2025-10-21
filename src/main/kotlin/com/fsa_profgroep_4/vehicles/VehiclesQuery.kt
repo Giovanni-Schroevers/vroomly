@@ -18,6 +18,15 @@ class VehiclesQuery(
     /** ========================================================
      *                     CREATE FUNCTIONS
      *  ======================================================== */
+    /**
+     * Creates an entry of a singular Vehicle in the database.
+     *
+     * @return a [Vehicle] object.
+     */
+    suspend fun createVehicle(vehicle: Vehicle): Vehicle{
+        val repository = vehicleRepository
+        return vehicleService.createVehicle(repository, vehicle)
+    }
     /** ========================================================
      *                      READ FUNCTIONS
      *  ======================================================== */

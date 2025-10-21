@@ -36,8 +36,51 @@ data class Vehicle (
     val engineType: EngineType,
     // TODO: Add reviewStars to UML
     @param:GraphQLDescription("Average review stars for this vehicle")
-    val reviewStars: Double
+    val reviewStars: Double,
+    @param:GraphQLDescription("Vehicle model's unique id")
+    val vehicleModelId: Int? // The only reason this is here is to link Vehicle to VehicleModel in the DB and avoid extra queries
 )
+
+@GraphQLDescription("Vehicle data used for updating existing vehicle entries")
+data class VehicleUpdate (
+    @param:GraphQLDescription("Vehicle unique id")
+    val id: Int,
+    @param:GraphQLDescription("Vehicle owner's unique id")
+    val ownerId: Int?,
+    // TODO add id and owner id to UML
+    @param:GraphQLDescription("Vehicle's brand")
+    val brand: String?,
+    @param:GraphQLDescription("Vehicle's model")
+    val model: String?,
+    @param:GraphQLDescription("Vehicle's build year")
+    val year: Int?,
+    @param:GraphQLDescription("Vehicle's license plate")
+    val licensePlate: String?,
+    @param:GraphQLDescription("Vehicle's vin")
+    val vin: String?,
+    @param:GraphQLDescription("Vehicle's MOT Valid till certain date")
+    val motValidTill: String?,
+    @param:GraphQLDescription("Vehicle's odometer in km")
+    val odometerKm: Double?,
+    @param:GraphQLDescription("Amount of seats in the vehicle")
+    val seats: Int?,
+    @param:GraphQLDescription("Vehicle's color")
+    val color: String?,
+    @param:GraphQLDescription("Vehicle current status")
+    val status: VehicleStatus?,
+    @param:GraphQLDescription("Vehicle category/type")
+    val category: VehicleCategory?,
+    @param:GraphQLDescription("Vehicle's cost per day to rent")
+    val costPerDay: Double?,
+    @param:GraphQLDescription("Vehicle's engine type")
+    val engineType: EngineType?,
+    // TODO: Add reviewStars to UML
+    @param:GraphQLDescription("Average review stars for this vehicle")
+    val reviewStars: Double?,
+    @param:GraphQLDescription("Vehicle model's unique id")
+    val vehicleModelId: Int? // The only reason this is here is to link Vehicle to VehicleModel in the DB and avoid extra queries
+)
+
 @GraphQLDescription("Types of vehicle status")
 enum class VehicleStatus {
     @GraphQLDescription("Vehicle is available for renting")

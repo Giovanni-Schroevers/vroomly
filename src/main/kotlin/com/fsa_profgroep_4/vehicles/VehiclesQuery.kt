@@ -137,6 +137,19 @@ class VehiclesQuery(
      *                      UPDATE FUNCTIONS
      *  ======================================================== */
 
+    /**
+     * Updates a vehicle from the database.
+     *
+     * @return the deleted [Vehicle] object.
+     */
+    suspend fun updateVehicle(
+        @GraphQLDescription("VehicleUpdate to update")
+        vehicle: VehicleUpdate
+    ): Vehicle {
+        val repository = vehicleRepository
+        return vehicleService.updateVehicle(repository, vehicle)
+    }
+
     /** ========================================================
      *                      DELETE FUNCTIONS
      *  ======================================================== */

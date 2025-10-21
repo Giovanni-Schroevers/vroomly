@@ -36,7 +36,8 @@ object VehicleHelper {
                 engineType = EngineType.entries.random(),
                 category = VehicleCategory.entries.toTypedArray().random(),
                 reviewStars = listOf(3.5, 4.0, 4.5, 5.0).random(),
-                year = (2000..2025).random()
+                year = (2000..2025).random(),
+                vehicleModelId = null // This doesn't need to be set for generating vehicles
             )
         }
     }

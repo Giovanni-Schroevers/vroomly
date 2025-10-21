@@ -55,6 +55,14 @@ class VehicleService {
      *                     UPDATE FUNCTIONS
      *  ======================================================== */
 
+    suspend fun updateVehicle(repository: VehicleRepository, vehicleUpdate: VehicleUpdate): Vehicle {
+        semaphore.withPermit {
+            val updatedVehicle = repository.updateVehicle(vehicleUpdate)
+            if (updatedVehicle != null)
+                return updatedVehicle
+        }
+        return null!!
+    }
 
     /** ========================================================
      *                     DELETE FUNCTIONS

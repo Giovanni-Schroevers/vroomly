@@ -47,18 +47,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
             .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
             .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
             .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
-            .select(
-                VehicleTable.Id,
-                VehicleTable.LicensePlate,
-                VehicleTable.Status,
-                VehicleTable.Vin,
-                VehicleModelTable.Brand,
-                VehicleModelTable.Model,
-                VehicleModelTable.Category,
-                VehicleModelTable.Seats,
-                EngineTypeTable.Code,
-                OwnershipTable.UserId
-            )
+            .selectAll()
             .map { row -> mapResultRowToVehicle(row) }
     }
 
@@ -67,7 +56,6 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         return try {
             transaction {
                 try {
-
                     // --- ENGINE TYPE ---
                     val engineTypeId = EngineTypeTable
                         .select(EngineTypeTable.Id)
@@ -116,9 +104,8 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                         }
 
                         val returned = insertStmt.resultedValues?.firstOrNull()
-                            ?: throw IllegalStateException("Insert returned null for Vehicle with license plate '${vehicle.licensePlate}'. Check if the ID column is auto-increment.")
-
-                        returned[VehicleTable.Id]
+                        returned?.get(VehicleTable.Id)
+                            ?: throw IllegalStateException("Failed to insert or retrieve VehicleModel '${vehicle.brand} ${vehicle.model} ${vehicle.year}'")
                     }
 
                     // --- OWNERSHIP ---

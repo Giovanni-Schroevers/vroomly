@@ -1,11 +1,10 @@
 package com.fsa_profgroep_4.vehicles.types
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import java.time.LocalDate
 
 @GraphQLDescription("Vehicles owned by owner (verhuurder)")
 data class Vehicle (
     @param:GraphQLDescription("Vehicle unique id")
-    val id: Int,
+    val id: Int? = null,
     @param:GraphQLDescription("Vehicle owner's unique id")
     val ownerId: Int,
     // TODO add id and owner id to UML

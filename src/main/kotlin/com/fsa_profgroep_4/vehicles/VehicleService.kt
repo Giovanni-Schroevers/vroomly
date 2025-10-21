@@ -1,48 +1,65 @@
 package com.fsa_profgroep_4.vehicles
 
+import com.fsa_profgroep_4.repository.VehicleRepository
 import com.fsa_profgroep_4.vehicles.types.*
-import java.time.LocalDate
-import kotlin.String
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 class VehicleService {
-    private val mockVehicles: List<Vehicle> = VehicleHelper.generateMockVehicles(100)
-    private val mockImages: List<VehicleImage> = VehicleHelper.generateMockVehicleImages(mockVehicles)
+    val semaphoreBulk = Semaphore(10) // max 10 concurrent inserts for seeding
+    val semaphore = Semaphore(3) // max 3 concurrent reads/writes for normal operations
+    /** ========================================================
+     *                     CREATE FUNCTIONS
+     *  ======================================================== */
 
-    suspend fun getAllVehiclesByOwner(ownerId: Int): List<Vehicle> {
-        return mockVehicles.filter { it.ownerId == ownerId }
-    }
-
-    suspend fun getVehicleById(id: Int): Vehicle {
-        return mockVehicles.first { it.id == id }
-    }
-
-    suspend fun getBasicVehicleInfoById(ids: List<Int>): BasicVehicleInfo {
-        val vehicles = mockVehicles.filter { it.id in ids }
-
-        val basics = vehicles.map { vehicle ->
-            VehicleBasic(
-                id = vehicle.id,
-                ownerId = vehicle.ownerId,
-                brand = vehicle.brand,
-                costPerDay = vehicle.costPerDay,
-                engineType = vehicle.engineType,
-                reviewStars = vehicle.reviewStars
-            )
+    /** ========================================================
+     *                      READ FUNCTIONS
+     *  ======================================================== */
+    suspend fun getAllVehicles(repository: VehicleRepository): List<Vehicle> {
+        semaphore.withPermit {
+            val foundVehicles = repository.getAllVehicles()
+            if (foundVehicles.isNotEmpty())
+                return foundVehicles
         }
+        return listOf()
+    }
 
-        val images = vehicles.map { vehicle ->
-            mockImages.first { it.vehicleId == vehicle.id }
+    suspend fun getVehiclesByOwnerId(repository: VehicleRepository, ownerId: Int): List<Vehicle> {
+        semaphore.withPermit {
+            val foundVehicle = repository.findByOwnerId(ownerId)
+            if (foundVehicle.isNotEmpty())
+                return foundVehicle
         }
-
-        return BasicVehicleInfo(basics = basics, images = images)
+        return listOf()
     }
 
-    suspend fun getAllVehicles(): List<Vehicle> {
-        return mockVehicles
+    suspend fun getVehicleById(repository: VehicleRepository, vehicleId: Int): Vehicle? {
+        semaphore.withPermit {
+            val foundVehicle = repository.findById(vehicleId)
+            if (foundVehicle != null)
+                return foundVehicle
+        }
+        return null
     }
+    /** ========================================================
+     *                     UPDATE FUNCTIONS
+     *  ======================================================== */
 
-    suspend fun calculateTco(input: TcoInput, vehicle: Vehicle): VehicleTco {
+
+    /** ========================================================
+     *                     DELETE FUNCTIONS
+     *  ======================================================== */
+
+
+    /** ========================================================
+     *                     OTHER FUNCTIONS
+     *  ======================================================== */
+    suspend fun calculateTco(input: TcoInput, vehicle: Vehicle?): VehicleTco {
         val depreciation = input.AcquisitionCost - input.currentMarketValue
+
+        // Make sure vehicle is not null
+        if (vehicle == null)
+            throw IllegalArgumentException("Vehicle not found for TCO calculation" )
 
         val totalKmDriven = vehicle.odometerKm
         val fuelConsumed = (totalKmDriven / 100) * input.fuelConsumptionPer100Km
@@ -52,7 +69,8 @@ class VehicleService {
 
         val totalTaxAndRegistration = input.taxAndRegistrationPerYear * input.yearsOwned
 
-        val totalCost = depreciation + input.maintenanceCosts + fuelCosts + totalInsuranceCosts + totalTaxAndRegistration
+        val totalCost =
+            depreciation + input.maintenanceCosts + fuelCosts + totalInsuranceCosts + totalTaxAndRegistration
         val costPerKm = if (totalKmDriven == 0.0) 0.0 else totalCost / totalKmDriven
 
         return VehicleTco(
@@ -68,5 +86,34 @@ class VehicleService {
             yearsOwned = input.yearsOwned,
             tcoValue = totalCost
         )
+    }
+
+    suspend fun getBasicVehicleInfo(vehicles: List<Vehicle>): List<VehicleBasic> {
+    val basics = vehicles.map { vehicle ->
+        VehicleBasic(
+            id = vehicle.id,
+            ownerId = vehicle.ownerId,
+            brand = vehicle.brand,
+            costPerDay = vehicle.costPerDay,
+            engineType = vehicle.engineType,
+            reviewStars = vehicle.reviewStars
+        )
+    }
+
+    return basics
+    }
+
+    suspend fun vehicleDataSeeder(repository: VehicleRepository, amountToSeed: Int): List<Vehicle> {
+        val addedVehicles = mutableListOf<Vehicle>()
+
+        VehicleHelper.generateVehicles(amountToSeed).forEach { vehicle ->
+            semaphoreBulk.withPermit {
+                val savedVehicle = repository.saveVehicle(vehicle)
+                if (savedVehicle != null)
+                    addedVehicles.add(savedVehicle)
+            }
+        }
+
+        return addedVehicles
     }
 }

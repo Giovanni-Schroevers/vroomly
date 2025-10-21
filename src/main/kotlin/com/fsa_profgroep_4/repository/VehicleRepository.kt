@@ -7,6 +7,6 @@ interface VehicleRepository {
     fun findByOwnerId(ownerId: Int): List<Vehicle>
     fun getAllVehicles(): List<Vehicle>
     fun saveVehicle(vehicle: Vehicle): Vehicle?
-    fun deleteVehicle(vehicle: Vehicle): Vehicle
-    fun updateVehicle(vehicle: Vehicle): Unit
+    fun deleteVehicleById(vehicleId: Int): Vehicle?
+    fun updateVehicle(vehicle: Vehicle): Vehicle?
 }

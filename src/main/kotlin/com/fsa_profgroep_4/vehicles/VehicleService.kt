@@ -60,6 +60,14 @@ class VehicleService {
      *                     DELETE FUNCTIONS
      *  ======================================================== */
 
+    suspend fun deleteVehicle(repository: VehicleRepository, vehicleId: Int): Vehicle {
+        semaphore.withPermit {
+            val deletedVehicle = repository.deleteVehicleById(vehicleId)
+            if (deletedVehicle != null)
+                return deletedVehicle
+        }
+        return null!!
+    }
 
     /** ========================================================
      *                     OTHER FUNCTIONS

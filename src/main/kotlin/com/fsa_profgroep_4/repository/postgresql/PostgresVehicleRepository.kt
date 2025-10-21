@@ -138,13 +138,40 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         }
     }
 
-
-    override fun deleteVehicle(vehicle: Vehicle): Vehicle {
+    override fun updateVehicle(vehicle: Vehicle): Vehicle {
         TODO("Not yet implemented")
     }
 
-    override fun updateVehicle(vehicle: Vehicle): Unit {
-        TODO("Not yet implemented")
+    override fun deleteVehicleById(vehicleId: Int): Vehicle {
+        return transaction {
+            // Fetch the vehicle first so we can return it later
+            val vehicle = findById(vehicleId)
+                ?: throw IllegalStateException("Vehicle with ID $vehicleId not found.")
+
+            OdometerTable.deleteWhere { OdometerTable.VehicleId eq vehicleId }
+            LocationTable.deleteWhere { LocationTable.VehicleId eq vehicleId }
+            OwnershipTable.deleteWhere { OwnershipTable.VehicleId eq vehicleId }
+            MaintenanceTable.deleteWhere { MaintenanceTable.VehicleId eq vehicleId }
+            ReservationTable.deleteWhere { ReservationTable.VehicleId eq vehicleId }
+
+            // Delete the vehicle itself
+            val rowsDeleted = VehicleTable.deleteWhere { VehicleTable.Id eq vehicleId }
+
+            if (rowsDeleted == 0) {
+                throw IllegalStateException("Failed to delete vehicle with ID $vehicleId — not found or already deleted.")
+            }
+
+            // Delete related records in correct order (avoid FK constraint errors)
+            VehicleModelTable.deleteWhere {
+                (VehicleModelTable.Brand eq vehicle.brand) and
+                        (VehicleModelTable.Model eq vehicle.model) and
+                        (VehicleModelTable.Year eq vehicle.year) and
+                        (VehicleModelTable.Seats eq vehicle.seats)
+            }
+
+            // Return the deleted vehicle object
+            vehicle
+        }
     }
 
     fun getLatestOdometer(vehicleId: Int): Double = transaction {

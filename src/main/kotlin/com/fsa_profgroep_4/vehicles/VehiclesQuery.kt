@@ -141,6 +141,18 @@ class VehiclesQuery(
      *                      DELETE FUNCTIONS
      *  ======================================================== */
 
+    /**
+     * Deletes a vehicle from the database.
+     *
+     * @return the deleted [Vehicle] object.
+     */
+    suspend fun deleteVehicle(
+        @GraphQLDescription("Vehicle Id to delete")
+        vehicleId: Int
+    ): Vehicle {
+        val repository = vehicleRepository
+        return vehicleService.deleteVehicle(repository, vehicleId)
+    }
     /** ========================================================
      *                      OTHER FUNCTIONS
      *  ======================================================== */

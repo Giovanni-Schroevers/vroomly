@@ -18,56 +18,15 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         password = password
     )
 
-    override fun findById(id: Int): Vehicle? = transaction {
-        val query = (VehicleTable
-            .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
-            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
-            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
-            .selectAll()
-            .where { VehicleTable.Id eq id }
-            .limit(1)
-            .firstOrNull()
-
-        query?.let { mapResultRowToVehicle(it) }
-    }
-
-    override fun findByOwnerId(ownerId: Int): List<Vehicle> = transaction {
-        (VehicleTable
-            .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
-            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
-            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
-            .selectAll()
-            .where { OwnershipTable.UserId eq ownerId }
-            .map { row -> mapResultRowToVehicle(row) }
-    }
-
-
-    override fun getAllVehicles(): List<Vehicle> = transaction {
-        (VehicleTable
-            .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
-            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
-            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
-            .select(
-                VehicleTable.Id,
-                VehicleTable.LicensePlate,
-                VehicleTable.Status,
-                VehicleTable.Vin,
-                VehicleModelTable.Brand,
-                VehicleModelTable.Model,
-                VehicleModelTable.Category,
-                VehicleModelTable.Seats,
-                EngineTypeTable.Code,
-                OwnershipTable.UserId
-            )
-            .map { row -> mapResultRowToVehicle(row) }
-    }
+    /** ========================================================
+     *                     CREATE FUNCTIONS
+     *  ======================================================== */
 
     @OptIn(ExperimentalTime::class)
     override fun saveVehicle(vehicle: Vehicle): Vehicle? {
         return try {
             transaction {
                 try {
-
                     // --- ENGINE TYPE ---
                     val engineTypeId = EngineTypeTable
                         .select(EngineTypeTable.Id)
@@ -96,6 +55,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                             val insertStmt = VehicleModelTable.insert {
                                 it[Brand] = vehicle.brand
                                 it[Model] = vehicle.model
+                                it[Color] = vehicle.color
                                 it[Year] = vehicle.year
                                 it[Category] = vehicle.category.name
                                 it[Seats] = vehicle.seats
@@ -112,13 +72,13 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                             it[LicensePlate] = vehicle.licensePlate
                             it[Status] = vehicle.status.name
                             it[Vin] = vehicle.vin
+                            it[ReviewStars] = vehicle.reviewStars
                             it[VehicleModelId] = vehicleModelId
                         }
 
                         val returned = insertStmt.resultedValues?.firstOrNull()
-                            ?: throw IllegalStateException("Insert returned null for Vehicle with license plate '${vehicle.licensePlate}'. Check if the ID column is auto-increment.")
-
-                        returned[VehicleTable.Id]
+                        returned?.get(VehicleTable.Id)
+                            ?: throw IllegalStateException("Failed to insert or retrieve VehicleModel '${vehicle.brand} ${vehicle.model} ${vehicle.year}'")
                     }
 
                     // --- OWNERSHIP ---
@@ -151,14 +111,200 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         }
     }
 
+    /** ========================================================
+     *                      READ FUNCTIONS
+     *  ======================================================== */
 
-    override fun deleteVehicle(vehicle: Vehicle): Vehicle {
-        TODO("Not yet implemented")
+    override fun findById(id: Int): Vehicle? = transaction {
+        val query = (VehicleTable
+            .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
+            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
+            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
+            .selectAll()
+            .where { VehicleTable.Id eq id }
+            .limit(1)
+            .firstOrNull()
+
+        query?.let { mapResultRowToVehicle(it) }
     }
 
-    override fun updateVehicle(vehicle: Vehicle): Unit {
-        TODO("Not yet implemented")
+    override fun findByOwnerId(ownerId: Int): List<Vehicle> = transaction {
+        (VehicleTable
+            .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
+            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
+            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
+            .selectAll()
+            .where { OwnershipTable.UserId eq ownerId }
+            .map { row -> mapResultRowToVehicle(row) }
     }
+
+    override fun getAllVehicles(): List<Vehicle> = transaction {
+        (VehicleTable
+            .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
+            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
+            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
+            .selectAll()
+            .map { row -> mapResultRowToVehicle(row) }
+    }
+
+    /** ========================================================
+     *                      UPDATE FUNCTIONS
+     *  ======================================================== */
+
+    @OptIn(ExperimentalTime::class)
+    override fun updateVehicle(vehicle: VehicleUpdate): Vehicle? {
+        return try {
+            transaction {
+                try {
+                    if (vehicle.id == 0)
+                        throw IllegalArgumentException("Vehicle ID must be present for this update operation.")
+
+                    // --- Fetch current vehicle (for merging) ---
+                    val existingVehicle = findById(vehicle.id)
+                        ?: throw IllegalStateException("Vehicle with ID ${vehicle.id} not found.")
+
+                    // --- ENGINE TYPE ---
+                    val engineTypeId = vehicle.engineType?.name?.let { engineName ->
+                        EngineTypeTable
+                            .select(EngineTypeTable.Id)
+                            .where { EngineTypeTable.Code eq engineName }
+                            .firstOrNull()?.get(EngineTypeTable.Id)
+                            ?: run {
+                                val insertStmt = EngineTypeTable.insert {
+                                    it[Code] = engineName
+                                    it[Description] = engineName
+                                }
+                                insertStmt.resultedValues?.firstOrNull()?.get(EngineTypeTable.Id)
+                                    ?: throw IllegalStateException("Failed to insert or retrieve EngineType '$engineName'")
+                            }
+                    } ?: run {
+                        // Use existing engine type
+                        VehicleModelTable
+                            .selectAll()
+                            .where { VehicleModelTable.Id eq vehicle.id }
+                            .firstOrNull()?.get(VehicleModelTable.EngineTypeId)
+                            ?: throw IllegalStateException("Failed to retrieve existing EngineType for VehicleModel ID ${existingVehicle.vehicleModelId}")
+                    }
+
+                    // --- VEHICLE MODEL ---
+                    val vehicleModelId = existingVehicle.vehicleModelId ?: run {
+                        VehicleModelTable
+                            .selectAll()
+                            .where {
+                                (VehicleModelTable.Brand eq (vehicle.brand ?: existingVehicle.brand)) and
+                                        (VehicleModelTable.Model eq (vehicle.model ?: existingVehicle.model)) and
+                                        (VehicleModelTable.Year eq (vehicle.year ?: existingVehicle.year))
+                            }
+                            .firstOrNull()?.get(VehicleModelTable.Id)
+                            ?: run {
+                                val insertStmt = VehicleModelTable.insert {
+                                    it[Brand] = vehicle.brand ?: existingVehicle.brand
+                                    it[Model] = vehicle.model ?: existingVehicle.model
+                                    it[Year] = vehicle.year ?: existingVehicle.year
+                                    it[Category] = (vehicle.category ?: existingVehicle.category).name
+                                    it[Seats] = vehicle.seats ?: existingVehicle.seats
+                                    it[EngineTypeId] = engineTypeId
+                                }
+                                insertStmt.resultedValues?.firstOrNull()?.get(VehicleModelTable.Id)
+                                    ?: throw IllegalStateException("Failed to insert or retrieve VehicleModel.")
+                            }
+                    }
+
+                    // Update existing VehicleModel if it matches
+                    if(vehicleModelId == existingVehicle.vehicleModelId){
+                        VehicleModelTable.update(where = { VehicleModelTable.Id eq vehicleModelId }) {
+                            it[Brand] = vehicle.brand ?: existingVehicle.brand
+                            it[Model] = vehicle.model ?: existingVehicle.model
+                            it[Year] = vehicle.year ?: existingVehicle.year
+                            it[Category] = (vehicle.category ?: existingVehicle.category).name
+                            it[Seats] = vehicle.seats ?: existingVehicle.seats
+                            it[EngineTypeId] = engineTypeId
+                        }
+                    }
+
+                    // --- VEHICLE ---
+                    VehicleTable.update({ VehicleTable.Id eq vehicle.id }) {
+                        vehicle.licensePlate?.let { lp -> it[LicensePlate] = lp }
+                        vehicle.status?.let { st -> it[Status] = st.name }
+                        vehicle.vin?.let { vin -> it[Vin] = vin }
+                        it[VehicleModelId] = vehicleModelId
+                    }
+
+                    // --- OWNERSHIP ---
+                    vehicle.ownerId?.let { ownerId ->
+                        OwnershipTable.update({ OwnershipTable.VehicleId eq vehicle.id }) {
+                            it[UserId] = ownerId
+                        }
+                    }
+
+                    // --- ODOMETER ---
+                    vehicle.odometerKm?.let { odometer ->
+                        if (odometer > 0) {
+                            val updated = OdometerTable.update({ OdometerTable.VehicleId eq vehicle.id }) {
+                                it[Mileage] = odometer.toBigDecimal()
+                                it[Date] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                            }
+                            if (updated == 0) {
+                                // no existing odometer entry? insert one
+                                OdometerTable.insert {
+                                    it[VehicleId] = vehicle.id
+                                    it[Mileage] = odometer.toBigDecimal()
+                                    it[Date] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                                }
+                            }
+                        }
+                    }
+                    // Return the updated vehicle
+                    findById(vehicle.id)
+                } catch (e: Exception) {
+                    throw IllegalStateException("Failed to update vehicle '${vehicle.licensePlate ?: vehicle.id}': ${e.message}", e)
+                }
+            }
+        } catch (e: Exception) {
+            println("updateVehicle() error: ${e.message}")
+            throw IllegalStateException("Error updating vehicle '${vehicle.licensePlate ?: vehicle.id}': ${e.message}", e)
+        }
+    }
+
+    /** ========================================================
+     *                      DELETE FUNCTIONS
+     *  ======================================================== */
+
+    override fun deleteVehicleById(vehicleId: Int): Vehicle {
+        return transaction {
+            // Fetch the vehicle first so we can return it later
+            val vehicle = findById(vehicleId)
+                ?: throw IllegalStateException("Vehicle with ID $vehicleId not found.")
+
+            OdometerTable.deleteWhere { OdometerTable.VehicleId eq vehicleId }
+            LocationTable.deleteWhere { LocationTable.VehicleId eq vehicleId }
+            OwnershipTable.deleteWhere { OwnershipTable.VehicleId eq vehicleId }
+            MaintenanceTable.deleteWhere { MaintenanceTable.VehicleId eq vehicleId }
+            ReservationTable.deleteWhere { ReservationTable.VehicleId eq vehicleId }
+
+            // Delete the vehicle itself
+            val rowsDeleted = VehicleTable.deleteWhere { VehicleTable.Id eq vehicleId }
+
+            if (rowsDeleted == 0) {
+                throw IllegalStateException("Failed to delete vehicle with ID $vehicleId — not found or already deleted.")
+            }
+
+            // Delete related records in correct order (avoid FK constraint errors)
+            VehicleModelTable.deleteWhere {
+                (VehicleModelTable.Brand eq vehicle.brand) and
+                        (VehicleModelTable.Model eq vehicle.model) and
+                        (VehicleModelTable.Year eq vehicle.year) and
+                        (VehicleModelTable.Seats eq vehicle.seats)
+            }
+
+            // Return the deleted vehicle object
+            vehicle
+        }
+    }
+
+    /** ========================================================
+     *                      OTHER FUNCTIONS
+     *  ======================================================== */
 
     fun getLatestOdometer(vehicleId: Int): Double = transaction {
         OdometerTable
@@ -177,14 +323,15 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         year = row[VehicleModelTable.Year],
         licensePlate = row[VehicleTable.LicensePlate],
         vin = row[VehicleTable.Vin],
-        motValidTill = "", // Placeholder
+        motValidTill = "", // TODO: motValidTill, current still a Placeholder
         odometerKm = getLatestOdometer(row[VehicleTable.Id]),
         seats = row[VehicleModelTable.Seats],
-        color = "Unknown", // Placeholder
+        color = row[VehicleModelTable.Color],
         status = VehicleStatus.valueOf(row[VehicleTable.Status]),
         category = VehicleCategory.valueOf(row[VehicleModelTable.Category]),
-        costPerDay = 0.0, // Placeholder
+        costPerDay = 0.0, // TODO: CostPerDay, current still a Placeholder
         engineType = EngineType.valueOf(row[EngineTypeTable.Code]),
-        reviewStars = 0.0 // Placeholder
+        reviewStars = row[VehicleTable.ReviewStars],
+        vehicleModelId = row[VehicleModelTable.Id],
     )
 }

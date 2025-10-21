@@ -14,6 +14,7 @@ object VehicleModelTable : Table("dbo.vehicle_model") {
     val Id = integer("id").autoIncrement()
     val Brand = varchar("brand", 100)
     val Model = varchar("model", 100)
+    val Color = varchar("color", 30)
     val Year = integer("year")
     val Category = varchar("category", 50)
     val Seats = integer("seats")
@@ -26,6 +27,7 @@ object VehicleTable : Table("dbo.vehicle") {
     val LicensePlate = varchar("license_plate", 20).uniqueIndex()
     val Status = varchar("status", 50)
     val Vin = varchar("vin", 20).uniqueIndex()
+    val ReviewStars = double("review_stars")
     val VehicleModelId = reference("vehicle_model_id", VehicleModelTable.Id)
     override val primaryKey = PrimaryKey(Id)
 }

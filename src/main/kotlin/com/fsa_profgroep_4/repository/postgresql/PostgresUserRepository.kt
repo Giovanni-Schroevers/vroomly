@@ -28,25 +28,25 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
         transaction(database) {
             val result: ResultRow? = UsersTable
                 .selectAll()
-                .where { UsersTable.email eq email }
+                .where { UsersTable.Email eq email }
                 .limit(1)
                 .singleOrNull()
 
             if (result != null) {
-                if (!verify(result[UsersTable.password], password)) {
+                if (!verify(result[UsersTable.Password], password)) {
                     return@transaction
                 }
 
                 user = User(
-                    result[UsersTable.username],
-                    result[UsersTable.email],
-                    result[UsersTable.password],
-                    result[UsersTable.firstName],
-                    result[UsersTable.middleName],
-                    result[UsersTable.lastName],
-                    result[UsersTable.dateOfBirth].toJavaLocalDate(),
-                    result[UsersTable.id],
-                    result[UsersTable.creationDate].toInstant(TimeZone.currentSystemDefault()),
+                    result[UsersTable.Username],
+                    result[UsersTable.Email],
+                    result[UsersTable.Password],
+                    result[UsersTable.FirstName],
+                    result[UsersTable.MiddleName],
+                    result[UsersTable.LastName],
+                    result[UsersTable.DateOfBirth].toJavaLocalDate(),
+                    result[UsersTable.Id],
+                    result[UsersTable.CreationDate].toInstant(TimeZone.currentSystemDefault()),
                 )
             }
         }
@@ -59,15 +59,15 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
 
         transaction(database) {
             userId = UsersTable.insert {
-                it[username] = user.username
-                it[email] = user.email
-                it[password] = hash(user.password)
-                it[firstName] = user.firstname
-                if (user.middleName != null) it[middleName] = user.middleName
-                it[lastName] = user.lastname
-                it[dateOfBirth] = user.dateOfBirth.toKotlinLocalDate()
-                it[creationDate] = user.createdAt.toLocalDateTime(TimeZone.currentSystemDefault())
-            } get UsersTable.id
+                it[Username] = user.username
+                it[Email] = user.email
+                it[Password] = hash(user.password)
+                it[FirstName] = user.firstname
+                if (user.middleName != null) it[MiddleName] = user.middleName
+                it[LastName] = user.lastname
+                it[DateOfBirth] = user.dateOfBirth.toKotlinLocalDate()
+                it[CreationDate] = user.createdAt.toLocalDateTime(TimeZone.currentSystemDefault())
+            } get UsersTable.Id
         }
 
         return user.copy(id = userId)
@@ -79,39 +79,39 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
         transaction(database) {
             val result: ResultRow? = UsersTable.updateReturning(
                 returning = listOf(
-                    UsersTable.id,
-                    UsersTable.username,
-                    UsersTable.email,
-                    UsersTable.password,
-                    UsersTable.firstName,
-                    UsersTable.middleName,
-                    UsersTable.lastName,
-                    UsersTable.dateOfBirth,
-                    UsersTable.creationDate,
+                    UsersTable.Id,
+                    UsersTable.Username,
+                    UsersTable.Email,
+                    UsersTable.Password,
+                    UsersTable.FirstName,
+                    UsersTable.MiddleName,
+                    UsersTable.LastName,
+                    UsersTable.DateOfBirth,
+                    UsersTable.CreationDate,
                 ),
-                where = { UsersTable.email eq email }
+                where = { UsersTable.Email eq email }
             ) {
-                if (input.username != null) it[username] = input.username
-                if (input.password != null) it[password] = hash(input.password)
-                if (input.firstname != null) it[firstName] = input.firstname
-                if (input.middleName != null) it[middleName] = input.middleName
-                if (input.lastname != null) it[lastName] = input.lastname
-                if (input.dob != null) it[dateOfBirth] = input.dob.toKotlinLocalDate()
+                if (input.username != null) it[Username] = input.username
+                if (input.password != null) it[Password] = hash(input.password)
+                if (input.firstname != null) it[FirstName] = input.firstname
+                if (input.middleName != null) it[MiddleName] = input.middleName
+                if (input.lastname != null) it[LastName] = input.lastname
+                if (input.dob != null) it[DateOfBirth] = input.dob.toKotlinLocalDate()
             }.singleOrNull()
 
             if (result == null) {
-                error("User with email '$email' not found")
+                error("User with Email '$email' not found")
             } else {
                 updated = User(
-                    result[UsersTable.username],
-                    result[UsersTable.email],
-                    result[UsersTable.password],
-                    result[UsersTable.firstName],
-                    result[UsersTable.middleName],
-                    result[UsersTable.lastName],
-                    result[UsersTable.dateOfBirth].toJavaLocalDate(),
-                    result[UsersTable.id],
-                    result[UsersTable.creationDate].toInstant(TimeZone.currentSystemDefault()),
+                    result[UsersTable.Username],
+                    result[UsersTable.Email],
+                    result[UsersTable.Password],
+                    result[UsersTable.FirstName],
+                    result[UsersTable.MiddleName],
+                    result[UsersTable.LastName],
+                    result[UsersTable.DateOfBirth].toJavaLocalDate(),
+                    result[UsersTable.Id],
+                    result[UsersTable.CreationDate].toInstant(TimeZone.currentSystemDefault()),
                 )
             }
         }

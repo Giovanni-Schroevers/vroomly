@@ -52,6 +52,19 @@ object OwnershipTable : Table("dbo.ownership") {
     override val primaryKey = PrimaryKey(Id)
 }
 
+object VehicleImageTable : Table("vehicle_images") {
+    val Id = integer("id").autoIncrement()
+    val VehicleId = integer("vehicle_id")
+    val Number = integer("number")
+    val Url = varchar("url", 512)
+
+    init {
+        uniqueIndex(VehicleId, Number)
+    }
+
+    override val primaryKey = PrimaryKey(Id)
+}
+
 object OdometerTable : Table("dbo.odometer") {
     val Id = integer("id").autoIncrement()
     val VehicleId = reference("vehicle_id", VehicleTable.Id)

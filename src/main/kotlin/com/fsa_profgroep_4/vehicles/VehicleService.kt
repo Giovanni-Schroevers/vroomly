@@ -21,6 +21,15 @@ class VehicleService {
         }
         return null!!
     }
+
+    suspend fun addImageToVehicle(repository: VehicleRepository, vehicleId: Int, imageUrl: String, number: Int?): Vehicle {
+        semaphore.withPermit {
+            val updatedVehicle = repository.addImageToVehicle(vehicleId, imageUrl, number)
+            if (updatedVehicle != null)
+                return updatedVehicle
+        }
+        return null!!
+    }
     /** ========================================================
      *                      READ FUNCTIONS
      *  ======================================================== */
@@ -77,10 +86,18 @@ class VehicleService {
         return null!!
     }
 
+    suspend fun removeImageFromVehicle(repository: VehicleRepository, vehicleId: Int, imageId: Int): Vehicle {
+        semaphore.withPermit {
+            val updatedVehicle = repository.removeImageFromVehicle(vehicleId, imageId)
+            if (updatedVehicle != null)
+                return updatedVehicle
+        }
+        return null!!
+    }
     /** ========================================================
      *                     OTHER FUNCTIONS
      *  ======================================================== */
-    suspend fun calculateTco(input: TcoInput, vehicle: Vehicle?): VehicleTco {
+    fun calculateTco(input: TcoInput, vehicle: Vehicle?): VehicleTco {
         val depreciation = input.AcquisitionCost - input.currentMarketValue
 
         // Make sure vehicle is not null
@@ -114,7 +131,7 @@ class VehicleService {
         )
     }
 
-    suspend fun getBasicVehicleInfo(vehicles: List<Vehicle>): List<VehicleBasic> {
+    fun getBasicVehicleInfo(vehicles: List<Vehicle>): List<VehicleBasic> {
     val basics = vehicles.map { vehicle ->
         VehicleBasic(
             id = vehicle.id,

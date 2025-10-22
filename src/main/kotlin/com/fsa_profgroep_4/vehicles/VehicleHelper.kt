@@ -34,6 +34,7 @@ object VehicleHelper {
                 status = status,
                 costPerDay = (30..120).random().toDouble(),
                 engineType = EngineType.entries.random(),
+                images = emptyList(),
                 category = VehicleCategory.entries.toTypedArray().random(),
                 reviewStars = listOf(3.5, 4.0, 4.5, 5.0).random(),
                 year = (2000..2025).random(),

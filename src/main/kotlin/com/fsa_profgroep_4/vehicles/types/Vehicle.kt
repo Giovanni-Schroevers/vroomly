@@ -34,6 +34,8 @@ data class Vehicle (
     val costPerDay: Double,
     @param:GraphQLDescription("Vehicle's engine type")
     val engineType: EngineType,
+    @param:GraphQLDescription("Vehicle images")
+    val images: List<VehicleImage>,
     // TODO: Add reviewStars to UML
     @param:GraphQLDescription("Average review stars for this vehicle")
     val reviewStars: Double,
@@ -70,6 +72,8 @@ data class VehicleUpdate (
     val status: VehicleStatus?,
     @param:GraphQLDescription("Vehicle category/type")
     val category: VehicleCategory?,
+    @param:GraphQLDescription("Vehicle images")
+    val images: List<VehicleImage>?,
     @param:GraphQLDescription("Vehicle's cost per day to rent")
     val costPerDay: Double?,
     @param:GraphQLDescription("Vehicle's engine type")

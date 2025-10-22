@@ -38,10 +38,13 @@ class VehiclesQuery(
         vehicleId: Int,
 
         @GraphQLDescription("Image URL to add to vehicle")
-        imageUrl: String
+        imageUrl: String,
+
+        @GraphQLDescription("Optional image number/position, 0 is main image")
+        number: Int?
     ): Vehicle {
         val repository = vehicleRepository
-        return vehicleService.addImageToVehicle(repository, vehicleId, imageUrl)
+        return vehicleService.addImageToVehicle(repository, vehicleId, imageUrl, number)
     }
     /** ========================================================
      *                      READ FUNCTIONS

@@ -111,30 +111,50 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         }
     }
 
-    override fun addImageToVehicle(vehicleId: Int, imageUrl: String): Vehicle? {
+    override fun addImageToVehicle(vehicleId: Int, imageUrl: String, number: Int?): Vehicle? {
         return transaction {
             try {
-                // Determine the next image number for this vehicle
-                val nextImageNumber = VehicleImageTable
+                // Determine the image number to use (append if null)
+                val targetNumber = number ?: VehicleImageTable
                     .selectAll()
                     .where { VehicleImageTable.VehicleId eq vehicleId }
                     .count()
                     .toInt()
 
-                // Insert the new image
+                // Fetch all affected images with number >= targetNumber, ordered DESC so we update highest first
+                val affected = VehicleImageTable
+                    .selectAll()
+                    .where {
+                        (VehicleImageTable.VehicleId eq vehicleId) and
+                                (VehicleImageTable.Number greaterEq targetNumber)
+                    }
+                    .orderBy(VehicleImageTable.Number, SortOrder.DESC)
+                    .map { row -> row[VehicleImageTable.Id] to row[VehicleImageTable.Number] }
+
+                // Update each row individually (highest first) to avoid unique-key conflicts
+                affected.forEach { (id, currentNumber) ->
+                    VehicleImageTable.update({ VehicleImageTable.Id eq id }) {
+                        it[Number] = currentNumber + 1
+                    }
+                }
+
+                // Insert the new image at targetNumber
                 VehicleImageTable.insert {
                     it[VehicleId] = vehicleId
-                    it[Number] = nextImageNumber
+                    it[Number] = targetNumber
                     it[Url] = imageUrl
                 }
 
-                // Return the updated vehicle
+                // Return updated vehicle
                 findById(vehicleId)
             } catch (e: Exception) {
                 throw IllegalStateException("Failed to add image to vehicle ID $vehicleId: ${e.message}", e)
             }
         }
     }
+
+
+
 
     /** ========================================================
      *                      READ FUNCTIONS

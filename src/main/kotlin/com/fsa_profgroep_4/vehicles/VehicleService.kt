@@ -22,9 +22,9 @@ class VehicleService {
         return null!!
     }
 
-    suspend fun addImageToVehicle(repository: VehicleRepository, vehicleId: Int, imageUrl: String): Vehicle {
+    suspend fun addImageToVehicle(repository: VehicleRepository, vehicleId: Int, imageUrl: String, number: Int?): Vehicle {
         semaphore.withPermit {
-            val updatedVehicle = repository.addImageToVehicle(vehicleId, imageUrl)
+            val updatedVehicle = repository.addImageToVehicle(vehicleId, imageUrl, number)
             if (updatedVehicle != null)
                 return updatedVehicle
         }

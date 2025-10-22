@@ -6,19 +6,11 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 @GraphQLDescription("Images associated with vehicles")
 data class VehicleImage (
     @param:GraphQLDescription("Image's unique id")
-    val id: String,
+    val id: Int? = null,
     @param:GraphQLDescription("Image's vehicle unique id")
     val vehicleId: Int,
-    @param:GraphQLDescription("Path to the image resource")
-    val path: String,
-    @param:GraphQLDescription("Type of image ")
-    val type: VehicleImageType? = null
+    @param:GraphQLDescription("Url to the image resource")
+    val url: String,
+    @param:GraphQLDescription("What position the image has, 0 is main image")
+    val number: Int
 )
-
-// TODO: Add VehicleImageType enum in UML
-enum class VehicleImageType {
-    @GraphQLDescription("Main image of the vehicle")
-    MAIN,
-    @GraphQLDescription("Additional image of the vehicle")
-    ADDITIONAL
-}

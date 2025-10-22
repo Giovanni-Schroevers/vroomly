@@ -111,6 +111,31 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         }
     }
 
+    override fun addImageToVehicle(vehicleId: Int, imageUrl: String): Vehicle? {
+        return transaction {
+            try {
+                // Determine the next image number for this vehicle
+                val nextImageNumber = VehicleImageTable
+                    .selectAll()
+                    .where { VehicleImageTable.VehicleId eq vehicleId }
+                    .count()
+                    .toInt()
+
+                // Insert the new image
+                VehicleImageTable.insert {
+                    it[VehicleId] = vehicleId
+                    it[Number] = nextImageNumber
+                    it[Url] = imageUrl
+                }
+
+                // Return the updated vehicle
+                findById(vehicleId)
+            } catch (e: Exception) {
+                throw IllegalStateException("Failed to add image to vehicle ID $vehicleId: ${e.message}", e)
+            }
+        }
+    }
+
     /** ========================================================
      *                      READ FUNCTIONS
      *  ======================================================== */
@@ -281,6 +306,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
             OwnershipTable.deleteWhere { OwnershipTable.VehicleId eq vehicleId }
             MaintenanceTable.deleteWhere { MaintenanceTable.VehicleId eq vehicleId }
             ReservationTable.deleteWhere { ReservationTable.VehicleId eq vehicleId }
+            VehicleImageTable.deleteWhere { VehicleImageTable.VehicleId eq vehicleId }
 
             // Delete the vehicle itself
             val rowsDeleted = VehicleTable.deleteWhere { VehicleTable.Id eq vehicleId }
@@ -301,6 +327,41 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
             vehicle
         }
     }
+
+    override fun removeImageFromVehicle(vehicleId: Int, imageId: Int): Vehicle? {
+        return transaction {
+            try {
+                // Delete the image
+                val rowsDeleted = VehicleImageTable.deleteWhere {
+                    (VehicleImageTable.VehicleId eq vehicleId) and
+                            (VehicleImageTable.Id eq imageId)
+                }
+
+                if (rowsDeleted == 0) {
+                    throw IllegalStateException("No image with ID $imageId found for vehicle ID $vehicleId.")
+                }
+
+                // Renumber remaining images
+                val remainingImages = VehicleImageTable
+                    .selectAll()
+                    .where { VehicleImageTable.VehicleId eq vehicleId }
+                    .orderBy(VehicleImageTable.Number, SortOrder.ASC)
+                    .map { it[VehicleImageTable.Id] }
+
+                remainingImages.forEachIndexed { index, id ->
+                    VehicleImageTable.update({ VehicleImageTable.Id eq id }) {
+                        it[Number] = index
+                    }
+                }
+
+                // Return the updated vehicle
+                findById(vehicleId)
+            } catch (e: Exception) {
+                throw IllegalStateException("Failed to remove image ID $imageId from vehicle ID $vehicleId: ${e.message}", e)
+            }
+        }
+    }
+
 
     /** ========================================================
      *                      OTHER FUNCTIONS
@@ -333,5 +394,19 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         engineType = EngineType.valueOf(row[EngineTypeTable.Code]),
         reviewStars = row[VehicleTable.ReviewStars],
         vehicleModelId = row[VehicleModelTable.Id],
+        images = row[VehicleTable.Id].let { vehicleId ->
+            VehicleImageTable
+                .selectAll()
+                .where{ VehicleImageTable.VehicleId eq vehicleId }
+                .orderBy(VehicleImageTable.Number, SortOrder.ASC)
+                .map { imageRow ->
+                    VehicleImage(
+                        id = imageRow[VehicleImageTable.Id],
+                        vehicleId = imageRow[VehicleImageTable.VehicleId],
+                        url = imageRow[VehicleImageTable.Url],
+                        number = imageRow[VehicleImageTable.Number]
+                    )
+                }
+        }
     )
 }

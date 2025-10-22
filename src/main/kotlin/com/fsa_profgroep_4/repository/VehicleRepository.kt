@@ -10,4 +10,6 @@ interface VehicleRepository {
     fun saveVehicle(vehicle: Vehicle): Vehicle?
     fun deleteVehicleById(vehicleId: Int): Vehicle?
     fun updateVehicle(vehicle: VehicleUpdate): Vehicle?
+    fun addImageToVehicle(vehicleId: Int, imageUrl: String): Vehicle?
+    fun removeImageFromVehicle(vehicleId: Int, imageId: Int): Vehicle?
 }

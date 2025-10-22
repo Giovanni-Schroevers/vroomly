@@ -27,6 +27,22 @@ class VehiclesQuery(
         val repository = vehicleRepository
         return vehicleService.createVehicle(repository, vehicle)
     }
+
+    /**
+     * Adds an image to a vehicle in the database.
+     *
+     * @return the [Vehicle] object with the added image.
+     */
+    suspend fun addImageToVehicle(
+        @GraphQLDescription("Vehicle Id to add image to")
+        vehicleId: Int,
+
+        @GraphQLDescription("Image URL to add to vehicle")
+        imageUrl: String
+    ): Vehicle {
+        val repository = vehicleRepository
+        return vehicleService.addImageToVehicle(repository, vehicleId, imageUrl)
+    }
     /** ========================================================
      *                      READ FUNCTIONS
      *  ======================================================== */
@@ -165,6 +181,22 @@ class VehiclesQuery(
     ): Vehicle {
         val repository = vehicleRepository
         return vehicleService.deleteVehicle(repository, vehicleId)
+    }
+
+    /**
+     * Deletes an image from a vehicle in the database.
+     *
+     * @return the [Vehicle] object the image got deleted from.
+     */
+    suspend fun removeImageFromVehicle(
+        @GraphQLDescription("Vehicle Id to remove image from")
+        vehicleId: Int,
+
+        @GraphQLDescription("Image Id to remove from vehicle")
+        imageId: Int
+    ): Vehicle {
+        val repository = vehicleRepository
+        return vehicleService.removeImageFromVehicle(repository, vehicleId, imageId)
     }
     /** ========================================================
      *                      OTHER FUNCTIONS

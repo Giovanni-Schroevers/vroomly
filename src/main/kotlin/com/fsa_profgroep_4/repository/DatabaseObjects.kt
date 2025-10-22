@@ -52,9 +52,9 @@ object OwnershipTable : Table("dbo.ownership") {
     override val primaryKey = PrimaryKey(Id)
 }
 
-object VehicleImageTable : Table("vehicle_images") {
+object VehicleImageTable : Table("dbo.vehicle_images") {
     val Id = integer("id").autoIncrement()
-    val VehicleId = integer("vehicle_id")
+    val VehicleId = reference("vehicle_id", VehicleTable.Id)
     val Number = integer("number")
     val Url = varchar("url", 512)
 

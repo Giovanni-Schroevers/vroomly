@@ -1,5 +1,60 @@
 package com.fsa_profgroep_4.reservations
 
-class Reservation {
+import com.expediagroup.graphql.generator.annotations.GraphQLDescription
+import kotlinx.datetime.LocalDate
 
+@GraphQLDescription("Reservation for a vehicle")
+data class Reservation (
+    @param:GraphQLDescription("Reservation unique id")
+    val id: Int? = null,
+    @param:GraphQLDescription("Start date of Reservation")
+    val startDate: LocalDate,
+    @param:GraphQLDescription("End date of Reservation")
+    val endDate: LocalDate,
+    @param:GraphQLDescription("Reservation status")
+    val status: ReservationStatus,
+    @param:GraphQLDescription("Reservation totalCost")
+    val totalCost: Double,
+    @param:GraphQLDescription("Reservation paid or not")
+    val paid: Boolean,
+    @param:GraphQLDescription("Reservation creation date")
+    val createdAt: LocalDate,
+    @param:GraphQLDescription("Reservation vehicle id")
+    val VehicleId: Int,
+    @param:GraphQLDescription("Reservation id of vehicle renter")
+    val RenterId: Int,
+)
+
+@GraphQLDescription("Reservation data used for updating existing reservation entries")
+data class ReservationUpdate(
+    @param:GraphQLDescription("Reservation unique id")
+    val id: Int,
+    @param:GraphQLDescription("Start date of Reservation")
+    val startDate: LocalDate?,
+    @param:GraphQLDescription("End date of Reservation")
+    val endDate: LocalDate?,
+    @param:GraphQLDescription("Reservation status")
+    val status: ReservationStatus?,
+    @param:GraphQLDescription("Reservation totalCost")
+    val totalCost: Double?,
+    @param:GraphQLDescription("Reservation paid or not")
+    val paid: Boolean?,
+    @param:GraphQLDescription("Reservation vehicle id")
+    val VehicleId: Int?,
+    @param:GraphQLDescription("Reservation id of vehicle renter")
+    val RenterId: Int?,
+)
+
+@GraphQLDescription("Reservation status")
+enum class ReservationStatus{
+    @GraphQLDescription("Reservation pending")
+    PENDING,
+    @GraphQLDescription("Reservation confirmed")
+    CONFIRMED,
+    @GraphQLDescription("Reservation active")
+    ACTIVE,
+    @GraphQLDescription("Reservation completed")
+    COMPLETED,
+    @GraphQLDescription("Reservation cancelled")
+    CANCELLED,
 }

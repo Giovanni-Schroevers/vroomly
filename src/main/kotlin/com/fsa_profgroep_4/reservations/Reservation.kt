@@ -1,8 +1,8 @@
 package com.fsa_profgroep_4.reservations
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-import kotlinx.datetime.LocalDate
-
+//import kotlinx.datetime.LocalDate
+import java.time.LocalDate
 @GraphQLDescription("Reservation for a vehicle")
 data class Reservation (
     @param:GraphQLDescription("Reservation unique id")

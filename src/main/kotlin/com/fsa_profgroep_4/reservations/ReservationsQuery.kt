@@ -4,8 +4,8 @@ import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Query
 import com.fsa_profgroep_4.repository.*
 import io.ktor.server.application.ApplicationEnvironment
-import kotlinx.datetime.LocalDate
-
+//import kotlinx.datetime.LocalDate
+import java.time.LocalDate
 class ReservationsQuery(
     val reservationRepository: ReservationRepository
 ): Query {

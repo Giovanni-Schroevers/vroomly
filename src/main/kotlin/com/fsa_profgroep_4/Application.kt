@@ -66,7 +66,7 @@ fun Application.graphQLModule(){
             queries = listOf(
                 ExampleQuery(),
                 AuthQuery(environment),
-                ReservationsQuery(),
+//                ReservationsQuery(environment),
                 VehiclesQuery(environment)
             )
             mutations = listOf(

@@ -30,13 +30,6 @@ class RepositoryFactory(
         }
     }
 
-    fun createPaymentRepository(): PaymentRepository {
-        return when (database){
-            "PostgreSQL" -> PostgresPaymentRepository(jdbc, databaseUser, databasePassword)
-            else -> throw NotImplementedError("No PaymentRepository implementation available for database $database")
-        }
-    }
-
     fun createReservationRepository(): ReservationRepository {
         return when (database){
             "PostgreSQL" -> PostgresReservationRepository(jdbc, databaseUser, databasePassword)

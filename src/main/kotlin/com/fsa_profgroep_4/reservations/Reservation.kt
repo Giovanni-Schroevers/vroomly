@@ -1,4 +1,4 @@
-package com.fsa_profgroep_4.reservations.types
+package com.fsa_profgroep_4.reservations
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 //import kotlinx.datetime.LocalDate

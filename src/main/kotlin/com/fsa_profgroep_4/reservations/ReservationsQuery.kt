@@ -3,14 +3,19 @@ package com.fsa_profgroep_4.reservations
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.server.operations.Query
 import com.fsa_profgroep_4.repository.*
+import com.fsa_profgroep_4.reservations.types.*
 import io.ktor.server.application.ApplicationEnvironment
-//import kotlinx.datetime.LocalDate
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+
 class ReservationsQuery(
-    val reservationRepository: ReservationRepository
+    val reservationRepository: ReservationRepository,
+    val vehicleRepository: VehicleRepository
 ): Query {
     constructor(environment: ApplicationEnvironment) : this(
         RepositoryFactory(environment).createReservationRepository(),
+        RepositoryFactory(environment).createVehicleRepository()
     )
 
     @GraphQLDescription("create a new reservation for a vehicle")
@@ -24,7 +29,27 @@ class ReservationsQuery(
         @GraphQLDescription("End date of reservation")
         endDate: LocalDate,
         ): Reservation {
-        TODO("Reservation creation")
+        val vehicleRepository = vehicleRepository
+        val reservationRepository = reservationRepository
+
+        val vehicle = vehicleRepository.findById(vehicleId)
+            ?: throw IllegalStateException("No vehicle found with ID '$vehicleId'")
+
+        val reservation = Reservation(
+            startDate = startDate,
+            endDate = endDate,
+            renterId = renterId,
+            vehicleId = vehicleId,
+            totalCost = ChronoUnit.DAYS.between(startDate, endDate) * vehicle.costPerDay,
+            status = ReservationStatus.PENDING,
+            paid = false,
+            createdAt = LocalDate.now(),
+        )
+
+        reservationRepository.saveReservation(reservation)
+            ?.let { return it }
+
+        throw IllegalStateException("Error while creating reservation")
     }
 
     @GraphQLDescription("Get specific reservation by id")
@@ -32,7 +57,8 @@ class ReservationsQuery(
         @GraphQLDescription("Reservation Id")
         reservationId: Int
     ): Reservation? {
-        TODO("Get specific reservation by id")
+        val repository = reservationRepository
+        return repository.findById(reservationId)
     }
 
     @GraphQLDescription("Get all reservation for a vehicle by vehicleId")
@@ -40,7 +66,8 @@ class ReservationsQuery(
         @GraphQLDescription("Vehicle Id")
         vehicleId: Int
     ): List<Reservation> {
-        TODO("Get all reservation for a vehicle by vehicleId")
+        val repository = reservationRepository
+        return repository.findByVehicleId(vehicleId)
     }
 
     @GraphQLDescription("Get all reservation for a renter by renterId")
@@ -48,21 +75,27 @@ class ReservationsQuery(
         @GraphQLDescription("Renter Id")
         renterId: Int
     ): List<Reservation> {
-        TODO("Get all reservation for a renter by renterId")
+        val repository = reservationRepository
+        return repository.findByRenterId(renterId)
     }
 
     @GraphQLDescription("Update a reservation")
     fun updateReservation(
         @GraphQLDescription("Reservation to update")
-        reservationUpdate: ReservationUpdate
-    ){
-        TODO("Reservation update")
+        input: ReservationUpdate
+    ): Reservation {
+        val repository = reservationRepository
+        repository.updateReservation(input)
+            ?.let { return it }
+
+        throw IllegalStateException("Error while update reservation '${input.id}'")
     }
     @GraphQLDescription("Delete a reservation")
     fun deleteReservation(
         @GraphQLDescription("Id of the to be deleted reservation")
         reservationId: Int
-    ){
-        TODO("Reservation delete")
+    ): Reservation {
+        val repository = reservationRepository
+        return repository.deleteReservation(reservationId)
     }
 }

@@ -1,10 +1,11 @@
-package com.fsa_profgroep_4.reservations
+package com.fsa_profgroep_4.reservations.types
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
-//import kotlinx.datetime.LocalDate
 import java.time.LocalDate
+import kotlin.time.ExperimentalTime
+
 @GraphQLDescription("Reservation for a vehicle")
-data class Reservation (
+data class Reservation @OptIn(ExperimentalTime::class) constructor(
     @param:GraphQLDescription("Reservation unique id")
     val id: Int? = null,
     @param:GraphQLDescription("Start date of Reservation")
@@ -20,9 +21,9 @@ data class Reservation (
     @param:GraphQLDescription("Reservation creation date")
     val createdAt: LocalDate,
     @param:GraphQLDescription("Reservation vehicle id")
-    val VehicleId: Int,
+    val vehicleId: Int,
     @param:GraphQLDescription("Reservation id of vehicle renter")
-    val RenterId: Int,
+    val renterId: Int,
 )
 
 @GraphQLDescription("Reservation data used for updating existing reservation entries")
@@ -40,9 +41,9 @@ data class ReservationUpdate(
     @param:GraphQLDescription("Reservation paid or not")
     val paid: Boolean?,
     @param:GraphQLDescription("Reservation vehicle id")
-    val VehicleId: Int?,
+    val vehicleId: Int?,
     @param:GraphQLDescription("Reservation id of vehicle renter")
-    val RenterId: Int?,
+    val renterId: Int?,
 )
 
 @GraphQLDescription("Reservation status")

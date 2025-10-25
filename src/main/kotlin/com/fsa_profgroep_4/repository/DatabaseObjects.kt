@@ -82,24 +82,16 @@ object LocationTable : Table("dbo.location") {
     override val primaryKey = PrimaryKey(Id)
 }
 
-object PaymentTable : Table("dbo.payment") {
-    val Id = integer("id").autoIncrement()
-    val Amount = decimal("amount", 10, 2)
-    val Currency = varchar("currency", 10)
-    val PaymentMethod = varchar("payment_method", 50)
-    val Status = varchar("status", 50)
-    val PaymentDate = datetime("payment_date").defaultExpression(CurrentDateTime)
-    override val primaryKey = PrimaryKey(Id)
-}
-
 object ReservationTable : Table("dbo.reservation") {
     val Id = integer("id").autoIncrement()
     val UserId = reference("user_id", UsersTable.Id)
     val VehicleId = reference("vehicle_id", VehicleTable.Id)
-    val StartDate = datetime("start_date")
-    val EndDate = datetime("end_date")
+    val StartDate = date("start_date")
+    val EndDate = date("end_date")
     val Status = varchar("status", 50)
-    val PaymentId = reference("payment_id", PaymentTable.Id)
+    val TotalCost = double("total_cost")
+    val Paid = bool("paid")
+    val CreationDate = date("creation_date")
     override val primaryKey = PrimaryKey(Id)
 }
 

@@ -29,6 +29,13 @@ object VehicleTable : Table("dbo.vehicle") {
     val Vin = varchar("vin", 20).uniqueIndex()
     val ReviewStars = double("review_stars")
     val VehicleModelId = reference("vehicle_model_id", VehicleModelTable.Id)
+
+    val OwnerId = reference(
+        "owner_id",
+        UsersTable.Id,
+        onDelete = ReferenceOption.CASCADE,
+    )
+
     override val primaryKey = PrimaryKey(Id)
 }
 
@@ -45,12 +52,12 @@ object UsersTable : Table("dbo.users") {
     override val primaryKey = PrimaryKey(Id)
 }
 
-object OwnershipTable : Table("dbo.ownership") {
-    val Id = integer("id").autoIncrement()
-    val UserId = reference("user_id", UsersTable.Id)
-    val VehicleId = reference("vehicle_id", VehicleTable.Id)
-    override val primaryKey = PrimaryKey(Id)
-}
+//object OwnershipTable : Table("dbo.ownership") {
+//    val Id = integer("id").autoIncrement()
+//    val UserId = reference("user_id", UsersTable.Id)
+//    val VehicleId = reference("vehicle_id", VehicleTable.Id)
+//    override val primaryKey = PrimaryKey(Id)
+//}
 
 object VehicleImageTable : Table("dbo.vehicle_images") {
     val Id = integer("id").autoIncrement()

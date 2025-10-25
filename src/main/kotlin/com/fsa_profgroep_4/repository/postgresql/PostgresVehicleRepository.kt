@@ -74,6 +74,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                             it[Vin] = vehicle.vin
                             it[ReviewStars] = vehicle.reviewStars
                             it[VehicleModelId] = vehicleModelId
+                            it[OwnerId] = vehicle.ownerId
                         }
 
                         val returned = insertStmt.resultedValues?.firstOrNull()
@@ -81,11 +82,11 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                             ?: throw IllegalStateException("Failed to insert or retrieve VehicleModel '${vehicle.brand} ${vehicle.model} ${vehicle.year}'")
                     }
 
-                    // --- OWNERSHIP ---
-                    OwnershipTable.insert {
-                        it[UserId] = vehicle.ownerId
-                        it[VehicleId] = vehicleId
-                    }
+//                    // --- OWNERSHIP ---
+//                    OwnershipTable.insert {
+//                        it[UserId] = vehicle.ownerId
+//                        it[VehicleId] = vehicleId
+//                    }
 
                     // --- ODOMETER ---
                     if (vehicle.odometerKm > 0) {
@@ -161,10 +162,10 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
      *  ======================================================== */
 
     override fun findById(id: Int): Vehicle? = transaction {
+        // ✅ Removed OwnershipTable join - OwnerId is now in VehicleTable
         val query = (VehicleTable
             .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
-            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
-            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
+            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id }))
             .selectAll()
             .where { VehicleTable.Id eq id }
             .limit(1)
@@ -176,18 +177,16 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
     override fun findByOwnerId(ownerId: Int): List<Vehicle> = transaction {
         (VehicleTable
             .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
-            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
-            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
+            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id }))
             .selectAll()
-            .where { OwnershipTable.UserId eq ownerId }
+            .where { VehicleTable.OwnerId eq ownerId }
             .map { row -> mapResultRowToVehicle(row) }
     }
 
     override fun getAllVehicles(): List<Vehicle> = transaction {
         (VehicleTable
             .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
-            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id })
-            .innerJoin(OwnershipTable, { VehicleTable.Id }, { OwnershipTable.VehicleId }))
+            .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id }))
             .selectAll()
             .map { row -> mapResultRowToVehicle(row) }
     }
@@ -272,15 +271,16 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                         vehicle.licensePlate?.let { lp -> it[LicensePlate] = lp }
                         vehicle.status?.let { st -> it[Status] = st.name }
                         vehicle.vin?.let { vin -> it[Vin] = vin }
+                        vehicle.ownerId?.let { owner -> it[OwnerId] = owner }
                         it[VehicleModelId] = vehicleModelId
                     }
 
-                    // --- OWNERSHIP ---
-                    vehicle.ownerId?.let { ownerId ->
-                        OwnershipTable.update({ OwnershipTable.VehicleId eq vehicle.id }) {
-                            it[UserId] = ownerId
-                        }
-                    }
+//                    // --- OWNERSHIP ---
+//                    vehicle.ownerId?.let { ownerId ->
+//                        OwnershipTable.update({ OwnershipTable.VehicleId eq vehicle.id }) {
+//                            it[UserId] = ownerId
+//                        }
+//                    }
 
                     // --- ODOMETER ---
                     vehicle.odometerKm?.let { odometer ->
@@ -317,25 +317,21 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
 
     override fun deleteVehicleById(vehicleId: Int): Vehicle {
         return transaction {
-            // Fetch the vehicle first so we can return it later
             val vehicle = findById(vehicleId)
                 ?: throw IllegalStateException("Vehicle with ID $vehicleId not found.")
 
             OdometerTable.deleteWhere { OdometerTable.VehicleId eq vehicleId }
             LocationTable.deleteWhere { LocationTable.VehicleId eq vehicleId }
-            OwnershipTable.deleteWhere { OwnershipTable.VehicleId eq vehicleId }
             MaintenanceTable.deleteWhere { MaintenanceTable.VehicleId eq vehicleId }
             ReservationTable.deleteWhere { ReservationTable.VehicleId eq vehicleId }
             VehicleImageTable.deleteWhere { VehicleImageTable.VehicleId eq vehicleId }
 
-            // Delete the vehicle itself
             val rowsDeleted = VehicleTable.deleteWhere { VehicleTable.Id eq vehicleId }
 
             if (rowsDeleted == 0) {
                 throw IllegalStateException("Failed to delete vehicle with ID $vehicleId — not found or already deleted.")
             }
 
-            // Delete related records in correct order (avoid FK constraint errors)
             VehicleModelTable.deleteWhere {
                 (VehicleModelTable.Brand eq vehicle.brand) and
                         (VehicleModelTable.Model eq vehicle.model) and
@@ -343,7 +339,6 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                         (VehicleModelTable.Seats eq vehicle.seats)
             }
 
-            // Return the deleted vehicle object
             vehicle
         }
     }
@@ -398,19 +393,19 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
 
     fun mapResultRowToVehicle(row: ResultRow): Vehicle = Vehicle(
         id = row[VehicleTable.Id],
-        ownerId = row[OwnershipTable.UserId],
+        ownerId = row[VehicleTable.OwnerId],
         brand = row[VehicleModelTable.Brand],
         model = row[VehicleModelTable.Model],
         year = row[VehicleModelTable.Year],
         licensePlate = row[VehicleTable.LicensePlate],
         vin = row[VehicleTable.Vin],
-        motValidTill = "", // TODO: motValidTill, current still a Placeholder
+        motValidTill = "",
         odometerKm = getLatestOdometer(row[VehicleTable.Id]),
         seats = row[VehicleModelTable.Seats],
         color = row[VehicleModelTable.Color],
         status = VehicleStatus.valueOf(row[VehicleTable.Status]),
         category = VehicleCategory.valueOf(row[VehicleModelTable.Category]),
-        costPerDay = 0.0, // TODO: CostPerDay, current still a Placeholder
+        costPerDay = 0.0,
         engineType = EngineType.valueOf(row[EngineTypeTable.Code]),
         reviewStars = row[VehicleTable.ReviewStars],
         vehicleModelId = row[VehicleModelTable.Id],

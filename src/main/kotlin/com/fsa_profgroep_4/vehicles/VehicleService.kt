@@ -97,37 +97,55 @@ class VehicleService {
     /** ========================================================
      *                     OTHER FUNCTIONS
      *  ======================================================== */
-    fun calculateTco(input: TcoInput, vehicle: Vehicle?): VehicleTco {
-        val depreciation = input.AcquisitionCost - input.currentMarketValue
 
-        // Make sure vehicle is not null
-        if (vehicle == null)
-            throw IllegalArgumentException("Vehicle not found for TCO calculation" )
+    suspend fun calculateTcoByVehicleId(repository: VehicleRepository, vehicleId: Int): TCO {
+        val vehicle = getVehicleById(repository, vehicleId)
+            ?: throw IllegalArgumentException("Vehicle with ID $vehicleId not found")
 
-        val totalKmDriven = vehicle.odometerKm
-        val fuelConsumed = (totalKmDriven / 100) * input.fuelConsumptionPer100Km
-        val fuelCosts = fuelConsumed * input.fuelPricePerLiter
+        val tcoData = repository.getVehicleTcoData(vehicleId)
+            ?: throw IllegalArgumentException("TCO data not found for vehicle $vehicleId. Please add TCO data first.")
 
-        val totalInsuranceCosts = input.insuranceCostsPerYear * input.yearsOwned
+        return getTcoValue(tcoData, vehicle)
+    }
 
-        val totalTaxAndRegistration = input.taxAndRegistrationPerYear * input.yearsOwned
+    private fun getTcoValue(data: VehicleTcoData, vehicle: Vehicle): TCO {
+        val depreciation = data.acquisitionCost - data.currentMarketValue
 
-        val totalCost =
-            depreciation + input.maintenanceCosts + fuelCosts + totalInsuranceCosts + totalTaxAndRegistration
-        val costPerKm = if (totalKmDriven == 0.0) 0.0 else totalCost / totalKmDriven
+        val totalKmDriven = vehicle.odometerKm.toDouble()
+        val fuelConsumed = (totalKmDriven / 100.0) * data.fuelConsumptionPer100Km
+        val fuelCosts = fuelConsumed * data.fuelPricePerLiter
 
-        return VehicleTco(
-            id = input.id,
-            AcquisitionCost = input.AcquisitionCost,
-            currentMarketValue = input.currentMarketValue,
-            depreciation = depreciation,
-            maintenanceCost = input.maintenanceCosts,
-            fuelCost = fuelCosts,
-            insuranceCostPerYear = input.insuranceCostsPerYear,
-            taxAndRegistrationPerYear = input.taxAndRegistrationPerYear,
-            costPerKilometer = costPerKm,
-            yearsOwned = input.yearsOwned,
-            tcoValue = totalCost
+        val totalInsuranceCosts = data.insuranceCostsPerYear * data.yearsOwned
+        val totalTaxAndRegistration = data.taxAndRegistrationPerYear * data.yearsOwned
+
+        val totalCost = depreciation + data.maintenanceCosts + fuelCosts + totalInsuranceCosts + totalTaxAndRegistration
+        return TCO(tcoValue = totalCost)
+    }
+
+    fun computeConsumption(
+        fuelConsumptionPer100Km: Double,
+        fuelPricePerLiter: Double
+    ): VehicleConsumption {
+        val litersPerKm = fuelConsumptionPer100Km / 100.0
+        val kmPerLiter =
+            if (fuelConsumptionPer100Km > 0.0) 100.0 / fuelConsumptionPer100Km else 0.0
+        val costPerKm = litersPerKm * fuelPricePerLiter
+
+        return VehicleConsumption(
+            litersPerKm = litersPerKm,
+            kmPerLiter = kmPerLiter,
+            costPerKm = costPerKm
+        )
+    }
+
+    fun computeConsumptionForVehicle(
+        repo: VehicleRepository,
+        vehicleId: Int
+    ): VehicleConsumption? {
+        val data = repo.getVehicleTcoData(vehicleId) ?: return null
+        return computeConsumption(
+            fuelConsumptionPer100Km = data.fuelConsumptionPer100Km,
+            fuelPricePerLiter = data.fuelPricePerLiter
         )
     }
 

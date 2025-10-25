@@ -204,15 +204,28 @@ class VehiclesQuery(
     /** ========================================================
      *                      OTHER FUNCTIONS
      *  ======================================================== */
-    @GraphQLDescription("Calculate Total Cost of Ownership for a vehicle")
-    suspend fun vehicleTco(
-        @GraphQLDescription("TCO calculation input")
-        input: TcoInput
-    ): VehicleTco {
-        val repository = vehicleRepository
 
-        val vehicle = vehicleService.getVehicleById(repository, input.id)
-        return vehicleService.calculateTco(input, vehicle)
+    @GraphQLDescription("Calculate TCO by vehicle ID (uses stored TCO data)")
+    suspend fun vehicleTcoById(
+        @GraphQLDescription("Vehicle ID")
+        vehicleId: Int
+    ): TCO {
+        return vehicleService.calculateTcoByVehicleId(vehicleRepository, vehicleId)
+    }
+
+    @GraphQLDescription("Get TCO data for a vehicle")
+    suspend fun getVehicleTcoData(
+        @GraphQLDescription("Vehicle ID")
+        vehicleId: Int
+    ): VehicleTcoData? {
+        return vehicleRepository.getVehicleTcoData(vehicleId)
+    }
+
+    @GraphQLDescription("Get per-km fuel consumption and cost for a vehicle")
+    suspend fun vehicleConsumptionById(
+        @GraphQLDescription("Vehicle ID") vehicleId: Int
+    ): VehicleConsumption? {
+        return vehicleService.computeConsumptionForVehicle(vehicleRepository, vehicleId)
     }
 
     /**

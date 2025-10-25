@@ -97,6 +97,15 @@ enum class VehicleStatus {
     DECOMMISSIONED
 }
 
+data class VehicleConsumption(
+    @param:GraphQLDescription("Amount of liters consumed per km")
+    val litersPerKm: Double,
+    @param:GraphQLDescription("Amount of km driven per liter")
+    val kmPerLiter: Double,
+    @param:GraphQLDescription("Costs per km")
+    val costPerKm: Double
+)
+
 // TODO: Change the UML to match this VehicleCategory enum
 enum class VehicleCategory {
     SEDAN,

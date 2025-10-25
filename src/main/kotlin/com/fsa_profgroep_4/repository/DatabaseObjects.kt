@@ -52,12 +52,20 @@ object UsersTable : Table("dbo.users") {
     override val primaryKey = PrimaryKey(Id)
 }
 
-//object OwnershipTable : Table("dbo.ownership") {
-//    val Id = integer("id").autoIncrement()
-//    val UserId = reference("user_id", UsersTable.Id)
-//    val VehicleId = reference("vehicle_id", VehicleTable.Id)
-//    override val primaryKey = PrimaryKey(Id)
-//}
+object VehicleTcoDataTable : Table("dbo.vehicle_tco_data") {
+    val Id = integer("id").autoIncrement()
+    val VehicleId = reference("vehicle_id", VehicleTable.Id, onDelete = ReferenceOption.CASCADE).uniqueIndex()
+    val AcquisitionCost = decimal("acquisition_cost", 12, 2)
+    val CurrentMarketValue = decimal("current_market_value", 12, 2)
+    val MaintenanceCosts = decimal("maintenance_costs", 12, 2)
+    val FuelConsumptionPer100Km = decimal("fuel_consumption_per_100km", 5, 2)
+    val FuelPricePerLiter = decimal("fuel_price_per_liter", 5, 2)
+    val InsuranceCostsPerYear = decimal("insurance_costs_per_year", 12, 2)
+    val TaxAndRegistrationPerYear = decimal("tax_and_registration_per_year", 12, 2)
+    val YearsOwned = integer("years_owned")
+    override val primaryKey = PrimaryKey(Id)
+}
+
 
 object VehicleImageTable : Table("dbo.vehicle_images") {
     val Id = integer("id").autoIncrement()

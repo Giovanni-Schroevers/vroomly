@@ -162,7 +162,6 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
      *  ======================================================== */
 
     override fun findById(id: Int): Vehicle? = transaction {
-        // ✅ Removed OwnershipTable join - OwnerId is now in VehicleTable
         val query = (VehicleTable
             .leftJoin(VehicleModelTable, { VehicleTable.VehicleModelId }, { VehicleModelTable.Id })
             .leftJoin(EngineTypeTable, { VehicleModelTable.EngineTypeId }, { EngineTypeTable.Id }))
@@ -424,4 +423,68 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                 }
         }
     )
+
+    override fun getVehicleTcoData(vehicleId: Int): VehicleTcoData? = transaction {
+        VehicleTcoDataTable
+            .selectAll()
+            .where { VehicleTcoDataTable.VehicleId eq vehicleId }
+            .firstOrNull()
+            ?.let { row ->
+                VehicleTcoData(
+                    vehicleId = row[VehicleTcoDataTable.VehicleId],
+                    acquisitionCost = row[VehicleTcoDataTable.AcquisitionCost].toDouble(),
+                    currentMarketValue = row[VehicleTcoDataTable.CurrentMarketValue].toDouble(),
+                    maintenanceCosts = row[VehicleTcoDataTable.MaintenanceCosts].toDouble(),
+                    fuelConsumptionPer100Km = row[VehicleTcoDataTable.FuelConsumptionPer100Km].toDouble(),
+                    fuelPricePerLiter = row[VehicleTcoDataTable.FuelPricePerLiter].toDouble(),
+                    insuranceCostsPerYear = row[VehicleTcoDataTable.InsuranceCostsPerYear].toDouble(),
+                    taxAndRegistrationPerYear = row[VehicleTcoDataTable.TaxAndRegistrationPerYear].toDouble(),
+                    yearsOwned = row[VehicleTcoDataTable.YearsOwned]
+                )
+            }
+    }
+
+    override fun saveVehicleTcoData(data: VehicleTcoData): VehicleTcoData? = transaction {
+        try {
+            VehicleTcoDataTable.insert {
+                it[VehicleId] = data.vehicleId
+                it[AcquisitionCost] = data.acquisitionCost.toBigDecimal()
+                it[CurrentMarketValue] = data.currentMarketValue.toBigDecimal()
+                it[MaintenanceCosts] = data.maintenanceCosts.toBigDecimal()
+                it[FuelConsumptionPer100Km] = data.fuelConsumptionPer100Km.toBigDecimal()
+                it[FuelPricePerLiter] = data.fuelPricePerLiter.toBigDecimal()
+                it[InsuranceCostsPerYear] = data.insuranceCostsPerYear.toBigDecimal()
+                it[TaxAndRegistrationPerYear] = data.taxAndRegistrationPerYear.toBigDecimal()
+                it[YearsOwned] = data.yearsOwned
+            }
+            getVehicleTcoData(data.vehicleId)
+        } catch (e: Exception) {
+            throw IllegalStateException("Failed to save TCO data for vehicle ${data.vehicleId}: ${e.message}", e)
+        }
+    }
+
+
+    override fun updateVehicleTcoData(data: VehicleTcoDataInput): VehicleTcoData? = transaction {
+        try {
+            val rowsUpdated = VehicleTcoDataTable.update(
+                where = { VehicleTcoDataTable.VehicleId eq data.vehicleId }
+            ) {
+                data.acquisitionCost?.let { v -> it[AcquisitionCost] = v.toBigDecimal() }
+                data.currentMarketValue?.let { v -> it[CurrentMarketValue] = v.toBigDecimal() }
+                data.maintenanceCosts?.let { v -> it[MaintenanceCosts] = v.toBigDecimal() }
+                data.fuelConsumptionPer100Km?.let { v -> it[FuelConsumptionPer100Km] = v.toBigDecimal() }
+                data.fuelPricePerLiter?.let { v -> it[FuelPricePerLiter] = v.toBigDecimal() }
+                data.insuranceCostsPerYear?.let { v -> it[InsuranceCostsPerYear] = v.toBigDecimal() }
+                data.taxAndRegistrationPerYear?.let { v -> it[TaxAndRegistrationPerYear] = v.toBigDecimal() }
+                data.yearsOwned?.let { v -> it[YearsOwned] = v }
+            }
+
+            if (rowsUpdated == 0) {
+                throw IllegalStateException("No TCO data found for vehicle ${data.vehicleId}")
+            }
+            getVehicleTcoData(data.vehicleId)
+        } catch (e: Exception) {
+            throw IllegalStateException("Failed to update TCO data for vehicle ${data.vehicleId}: ${e.message}", e)
+        }
+    }
 }

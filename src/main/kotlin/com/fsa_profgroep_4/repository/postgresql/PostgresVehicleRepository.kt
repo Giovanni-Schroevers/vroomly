@@ -59,6 +59,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                                 it[Year] = vehicle.year
                                 it[Category] = vehicle.category.name
                                 it[Seats] = vehicle.seats
+                                it[ZeroToHundred] = vehicle.zeroToHundred
                                 it[EngineTypeId] = engineTypeId
                             }
                             val returned = insertStmt.resultedValues?.firstOrNull()
@@ -102,7 +103,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
 
                 } catch (e: Exception) {
                     // Catch any exception inside the transaction and throw a descriptive one
-                    throw IllegalStateException("Failed to save vehicle '${vehicle.licensePlate}': ${e.message}", e)
+                    throw IllegalStateException("Failed to save vehicle '${vehicle.licensePlate}': ${e.message} \n DATA: ${vehicle}", e)
                 }
             }
         } catch (e: Exception) {
@@ -245,6 +246,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                                     it[Model] = vehicle.model ?: existingVehicle.model
                                     it[Year] = vehicle.year ?: existingVehicle.year
                                     it[Category] = (vehicle.category ?: existingVehicle.category).name
+                                    it[ZeroToHundred] = vehicle.zeroToHundred ?: existingVehicle.zeroToHundred
                                     it[Seats] = vehicle.seats ?: existingVehicle.seats
                                     it[EngineTypeId] = engineTypeId
                                 }
@@ -322,8 +324,16 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
             OdometerTable.deleteWhere { OdometerTable.VehicleId eq vehicleId }
             LocationTable.deleteWhere { LocationTable.VehicleId eq vehicleId }
             MaintenanceTable.deleteWhere { MaintenanceTable.VehicleId eq vehicleId }
+
+            val reservationId = ReservationTable.select(ReservationTable.Id)
+                .where(ReservationTable.VehicleId eq vehicleId).firstOrNull()?.get(ReservationTable.Id)
+
+            if(reservationId != null)
+                DrivingReportTable.deleteWhere { DrivingReportTable.ReservationId eq reservationId }
+
             ReservationTable.deleteWhere { ReservationTable.VehicleId eq vehicleId }
             VehicleImageTable.deleteWhere { VehicleImageTable.VehicleId eq vehicleId }
+            VehicleTcoDataTable.deleteWhere { VehicleTcoDataTable.VehicleId eq vehicleId }
 
             val rowsDeleted = VehicleTable.deleteWhere { VehicleTable.Id eq vehicleId }
 
@@ -375,7 +385,6 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
             }
         }
     }
-
 
     /** ========================================================
      *                      OTHER FUNCTIONS
@@ -463,7 +472,6 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
             throw IllegalStateException("Failed to save TCO data for vehicle ${data.vehicleId}: ${e.message}", e)
         }
     }
-
 
     override fun updateVehicleTcoData(data: VehicleTcoDataInput): VehicleTcoData? = transaction {
         try {

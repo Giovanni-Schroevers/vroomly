@@ -181,12 +181,23 @@ class VehiclesQuery(
     }
 
     /**
+     * Cleans all data of a vehicle in the database.
+     *
+     * @return a string.
+     */
+    suspend fun cleanVehicleData(): String{
+        val vehRepository = vehicleRepository
+        return vehicleService.vehicleDataCleaner(vehRepository)
+    }
+
+    /**
      * Seeds the vehicle data in the database.
      *
      * @return a list of [Vehicle] objects.
      */
-    suspend fun seedVehicleData(amountToSeed: Int): List<Vehicle>{
+    suspend fun seedVehicleData(amountToSeed: Int, ownerId: Int): List<Vehicle>{
         val repository = vehicleRepository
-        return vehicleService.vehicleDataSeeder(repository, amountToSeed)
+        return vehicleService.vehicleDataSeeder(repository, amountToSeed, ownerId)
     }
+
 }

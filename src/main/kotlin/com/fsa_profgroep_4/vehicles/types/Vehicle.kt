@@ -78,6 +78,8 @@ data class VehicleUpdate (
     val images: List<VehicleImage>?,
     @param:GraphQLDescription("Vehicle's cost per day to rent")
     val costPerDay: Double?,
+    @param:GraphQLDescription("Vehicle's 0-100 time")
+    val zeroToHundred: Double?,
     @param:GraphQLDescription("Vehicle's engine type")
     val engineType: EngineType?,
     @param:GraphQLDescription("Vehicle's 0-100 time")

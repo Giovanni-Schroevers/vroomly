@@ -4,10 +4,11 @@ import com.fsa_profgroep_4.vehicles.types.EngineType
 import com.fsa_profgroep_4.vehicles.types.Vehicle
 import com.fsa_profgroep_4.vehicles.types.VehicleCategory
 import com.fsa_profgroep_4.vehicles.types.VehicleStatus
+import com.fsa_profgroep_4.vehicles.types.VehicleTcoData
 import java.time.LocalDate
 
 object VehicleHelper {
-    fun generateVehicles(count: Int = 10): List<Vehicle> {
+    fun generateVehicles(count: Int = 10, ownerId: Int): List<Vehicle> {
         val brands = listOf("Toyota", "Volkswagen", "BMW", "Audi", "Mercedes", "Ford", "Honda", "Nissan", "Kia", "Hyundai")
         val models = listOf("Corolla", "Golf", "3 Series", "A4", "C-Class", "Focus", "Civic", "Altima", "Sportage", "i30")
         val colors = listOf("Silver", "White", "Black", "Blue", "Red", "Grey", "Green")
@@ -15,7 +16,6 @@ object VehicleHelper {
 
         return (1..count).map { index ->
             val status = statuses.random()
-            val ownerId = 3 // For simplicity, all vehicles belong to owner with ID 3
 
             Vehicle(
                 ownerId = ownerId,
@@ -43,4 +43,19 @@ object VehicleHelper {
             )
         }
     }
+    fun generateVehicleTcoData(vehicleId: Int): VehicleTcoData {
+        val vehicleTco = VehicleTcoData(
+            vehicleId = vehicleId, // assuming vehicles exist with matching IDs
+            acquisitionCost = (10_000..80_000).random().toDouble(),
+            currentMarketValue = (5_000..70_000).random().toDouble(),
+            maintenanceCosts = (200..2_000).random().toDouble(),
+            fuelConsumptionPer100Km = (4..12).random().toDouble(),
+            fuelPricePerLiter = (1..3).random().toDouble(),
+            insuranceCostsPerYear = (300..1_200).random().toDouble(),
+            taxAndRegistrationPerYear = (100..800).random().toDouble(),
+            yearsOwned = (1..10).random(),
+        )
+        return vehicleTco
+    }
+
 }

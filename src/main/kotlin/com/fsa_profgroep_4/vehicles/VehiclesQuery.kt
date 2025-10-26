@@ -152,55 +152,7 @@ class VehiclesQuery(
 
         return vehicleService.getBasicVehicleInfo(pagedVehicles)
     }
-    /** ========================================================
-     *                      UPDATE FUNCTIONS
-     *  ======================================================== */
 
-    /**
-     * Updates a vehicle from the database.
-     *
-     * @return the deleted [Vehicle] object.
-     */
-    suspend fun updateVehicle(
-        @GraphQLDescription("VehicleUpdate to update")
-        vehicle: VehicleUpdate
-    ): Vehicle {
-        val repository = vehicleRepository
-        return vehicleService.updateVehicle(repository, vehicle)
-    }
-
-    /** ========================================================
-     *                      DELETE FUNCTIONS
-     *  ======================================================== */
-
-    /**
-     * Deletes a vehicle from the database.
-     *
-     * @return the deleted [Vehicle] object.
-     */
-    suspend fun deleteVehicle(
-        @GraphQLDescription("Vehicle Id to delete")
-        vehicleId: Int
-    ): Vehicle {
-        val repository = vehicleRepository
-        return vehicleService.deleteVehicle(repository, vehicleId)
-    }
-
-    /**
-     * Deletes an image from a vehicle in the database.
-     *
-     * @return the [Vehicle] object the image got deleted from.
-     */
-    suspend fun removeImageFromVehicle(
-        @GraphQLDescription("Vehicle Id to remove image from")
-        vehicleId: Int,
-
-        @GraphQLDescription("Image Id to remove from vehicle")
-        imageId: Int
-    ): Vehicle {
-        val repository = vehicleRepository
-        return vehicleService.removeImageFromVehicle(repository, vehicleId, imageId)
-    }
     /** ========================================================
      *                      OTHER FUNCTIONS
      *  ======================================================== */

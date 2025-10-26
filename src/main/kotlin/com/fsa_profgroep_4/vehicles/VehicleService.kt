@@ -1,5 +1,6 @@
 package com.fsa_profgroep_4.vehicles
 
+import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.fsa_profgroep_4.repository.VehicleRepository
 import com.fsa_profgroep_4.vehicles.types.*
 import kotlinx.coroutines.sync.Semaphore
@@ -30,6 +31,7 @@ class VehicleService {
         }
         return null!!
     }
+
     /** ========================================================
      *                      READ FUNCTIONS
      *  ======================================================== */
@@ -120,6 +122,36 @@ class VehicleService {
 
         val totalCost = depreciation + data.maintenanceCosts + fuelCosts + totalInsuranceCosts + totalTaxAndRegistration
         return TCO(tcoValue = totalCost)
+    }
+
+    suspend fun saveVehicleTcoData(repository: VehicleRepository, input: VehicleTcoDataInput): VehicleTcoData? {
+        semaphore.withPermit {
+            val vehicleTco = repository.saveVehicleTcoData(
+                VehicleTcoData(
+                    vehicleId = input.vehicleId,
+                    acquisitionCost = input.acquisitionCost ?: 0.0,
+                    currentMarketValue = input.currentMarketValue ?: 0.0,
+                    maintenanceCosts = input.maintenanceCosts ?: 0.0,
+                    fuelConsumptionPer100Km = input.fuelConsumptionPer100Km ?: 0.0,
+                    fuelPricePerLiter = input.fuelPricePerLiter ?: 0.0,
+                    insuranceCostsPerYear = input.insuranceCostsPerYear ?: 0.0,
+                    taxAndRegistrationPerYear = input.taxAndRegistrationPerYear ?: 0.0,
+                    yearsOwned = input.yearsOwned ?: 0
+                )
+            )
+            if (vehicleTco != null)
+                return vehicleTco
+        }
+        return null
+    }
+
+    suspend fun updateVehicleTcoData(repository: VehicleRepository, input: VehicleTcoDataInput): VehicleTcoData? {
+        semaphore.withPermit {
+            val updatedVehicleTco = repository.updateVehicleTcoData(input)
+            if (updatedVehicleTco != null)
+                return updatedVehicleTco
+        }
+        return null
     }
 
     fun computeConsumption(

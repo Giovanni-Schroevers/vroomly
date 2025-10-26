@@ -76,6 +76,9 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                             it[ReviewStars] = vehicle.reviewStars
                             it[VehicleModelId] = vehicleModelId
                             it[OwnerId] = vehicle.ownerId
+                            it[Longitude] = vehicle.location.longitude
+                            it[Latitude] = vehicle.location.latitude
+                            it[Address] = vehicle.location.address
                         }
 
                         val returned = insertStmt.resultedValues?.firstOrNull()
@@ -322,8 +325,6 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                 ?: throw IllegalStateException("Vehicle with ID $vehicleId not found.")
 
             OdometerTable.deleteWhere { OdometerTable.VehicleId eq vehicleId }
-            LocationTable.deleteWhere { LocationTable.VehicleId eq vehicleId }
-            MaintenanceTable.deleteWhere { MaintenanceTable.VehicleId eq vehicleId }
 
             val reservationId = ReservationTable.select(ReservationTable.Id)
                 .where(ReservationTable.VehicleId eq vehicleId).firstOrNull()?.get(ReservationTable.Id)
@@ -433,9 +434,9 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                 }
         },
         location = VehicleLocation(
-            row[VehicleTable.longitude],
-            row[VehicleTable.latitude],
-            row[VehicleTable.address]
+            row[VehicleTable.Longitude],
+            row[VehicleTable.Latitude],
+            row[VehicleTable.Address]
         )
     )
 

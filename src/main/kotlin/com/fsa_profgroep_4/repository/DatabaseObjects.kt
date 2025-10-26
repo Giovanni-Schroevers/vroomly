@@ -30,9 +30,9 @@ object VehicleTable : Table("dbo.vehicle") {
     val Vin = varchar("vin", 20).uniqueIndex()
     val ReviewStars = double("review_stars")
     val VehicleModelId = reference("vehicle_model_id", VehicleModelTable.Id)
-    val longitude = double("longitude")
-    val latitude = double("latitude")
-    val address = varchar("address", 255)
+    val Longitude = double("longitude")
+    val Latitude = double("latitude")
+    val Address = varchar("address", 255)
 
     val OwnerId = reference(
         "owner_id",
@@ -92,15 +92,6 @@ object OdometerTable : Table("dbo.odometer") {
     override val primaryKey = PrimaryKey(Id)
 }
 
-object LocationTable : Table("dbo.location") {
-    val Id = integer("id").autoIncrement()
-    val VehicleId = reference("vehicle_id", VehicleTable.Id)
-    val Latitude = decimal("latitude", 10, 6)
-    val Longitude = decimal("longitude", 10, 6)
-    val Date = datetime("date").defaultExpression(CurrentDateTime)
-    override val primaryKey = PrimaryKey(Id)
-}
-
 object ReservationTable : Table("dbo.reservation") {
     val Id = integer("id").autoIncrement()
     val UserId = reference("user_id", UsersTable.Id)
@@ -111,16 +102,6 @@ object ReservationTable : Table("dbo.reservation") {
     val TotalCost = double("total_cost")
     val Paid = bool("paid")
     val CreationDate = date("creation_date")
-    override val primaryKey = PrimaryKey(Id)
-}
-
-object MaintenanceTable : Table("dbo.maintenance") {
-    val Id = integer("id").autoIncrement()
-    val VehicleId = reference("vehicle_id", VehicleTable.Id)
-    val StartDate = date("start_date")
-    val EndDate = date("end_date").nullable()
-    val Cost = decimal("cost", 10, 2)
-    val Description = text("description")
     override val primaryKey = PrimaryKey(Id)
 }
 

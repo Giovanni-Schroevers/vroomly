@@ -23,14 +23,20 @@ class PostgresReservationRepository(jdbc: String, user: String, password: String
             .where { ReservationTable.Id eq id }
             .limit(1)
             .firstOrNull()
-            ?.let { mapResultRowToReservation(it) }
+            ?.let { row ->
+                val reports = loadDrivingReports(row[ReservationTable.Id])
+                mapResultRowToReservation(row, reports)
+            }
     }
 
     override fun findByRenterId(renterId: Int): List<Reservation> = transaction {
         ReservationTable
             .selectAll()
             .where { ReservationTable.UserId eq renterId }
-            .map { row -> mapResultRowToReservation(row) }
+            .map { row ->
+                val reports = loadDrivingReports(row[ReservationTable.Id])
+                mapResultRowToReservation(row, reports)
+            }
     }
 
     override fun findByVehicleId(vehicleId: Int): List<Reservation> = transaction {
@@ -94,7 +100,7 @@ class PostgresReservationRepository(jdbc: String, user: String, password: String
         findById(reservation.id)
     }
 
-    fun mapResultRowToReservation(row: ResultRow): Reservation = Reservation(
+    fun mapResultRowToReservation(row: ResultRow, drivingReports: List<DrivingReport>? = null): Reservation = Reservation(
         row[ReservationTable.Id],
         convertKotlinDateToJavaDate(row[ReservationTable.StartDate]),
         convertKotlinDateToJavaDate(row[ReservationTable.EndDate]),
@@ -103,6 +109,34 @@ class PostgresReservationRepository(jdbc: String, user: String, password: String
         row[ReservationTable.Paid],
         convertKotlinDateToJavaDate(row[ReservationTable.CreationDate]),
         row[ReservationTable.VehicleId],
-        row[ReservationTable.UserId]
+        row[ReservationTable.UserId],
+        drivingReports
     )
+
+    private fun loadDrivingReports(reservationId: Int): List<DrivingReport> {
+        val reports = DrivingReportTable
+            .selectAll()
+            .where { DrivingReportTable.ReservationId eq reservationId }
+            .map { drRow ->
+                val drId = drRow[DrivingReportTable.Id]
+                val violations = ViolationTable
+                    .selectAll()
+                    .where { ViolationTable.DrivingReportId eq drId }
+                    .map { vRow ->
+                        Violation(
+                            id = vRow[ViolationTable.Id],
+                            description = vRow[ViolationTable.Description],
+                            score = vRow[ViolationTable.Score]
+                        )
+                    }
+
+                DrivingReport(
+                    id = drId,
+                    safetyScore = drRow[DrivingReportTable.SafetyScore],
+                    date = convertKotlinDateToJavaDate(drRow[DrivingReportTable.Date]),
+                    violations = violations
+                )
+            }
+        return reports
+    }
 }

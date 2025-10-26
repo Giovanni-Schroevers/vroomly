@@ -408,6 +408,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         engineType = EngineType.valueOf(row[EngineTypeTable.Code]),
         reviewStars = row[VehicleTable.ReviewStars],
         vehicleModelId = row[VehicleModelTable.Id],
+        zeroToHundred = row[VehicleModelTable.ZeroToHundred],
         images = row[VehicleTable.Id].let { vehicleId ->
             VehicleImageTable
                 .selectAll()

@@ -45,14 +45,14 @@ class AuthMutation(private val userRepository: UserRepository): Mutation {
     @Suppress("unused")
     suspend fun editUser(input: EditInput, env: DataFetchingEnvironment): EditResponse {
         val token = requirePrincipal(env)
-        val email = token.payload.getClaim("email").asString()
+        val id = token.payload.getClaim("id").asInt()
 
         validateEdit(input)
 
         val repository = userRepository
 
         val updatedUser = try {
-            repository.update(email, input)
+            repository.update(id, input)
         } catch (e: Exception) {
             throw GraphQLException(e.message)
         }

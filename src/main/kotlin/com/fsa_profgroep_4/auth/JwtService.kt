@@ -22,15 +22,15 @@ class JwtService(
         val foundUser = repository.findByCredentials(input.email, input.password)
 
         return if (foundUser !== null) {
-            createAccessToken(foundUser.email) to foundUser
+            createAccessToken(foundUser.id) to foundUser
         } else null
     }
 
-    private fun createAccessToken(email: String): String = JWT
+    private fun createAccessToken(id: Int): String = JWT
         .create()
         .withAudience(jwtAudience)
         .withIssuer(jwtIssuer)
-        .withClaim("email", email)
+        .withClaim("id", id)
         .withExpiresAt(Date(System.currentTimeMillis() + 3_600_000))
         .sign(Algorithm.HMAC256(jwtSecret))
 }

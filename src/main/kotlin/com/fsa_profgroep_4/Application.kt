@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.hooks.SchemaGeneratorHooks
 import com.expediagroup.graphql.server.ktor.*
 import com.fsa_profgroep_4.auth.AuthMutation
 import com.fsa_profgroep_4.auth.AuthQuery
+import com.fsa_profgroep_4.driving_report.DrivingReportMutation
 import com.fsa_profgroep_4.example.ExampleQuery
 import com.fsa_profgroep_4.reservations.ReservationsQuery
 import com.fsa_profgroep_4.vehicles.VehiclesMutation
@@ -73,12 +74,14 @@ fun Application.graphQLModule(){
             mutations = listOf(
                 AuthMutation(environment),
                 VehiclesMutation(environment),
+                DrivingReportMutation(environment)
             )
             hooks = object : SchemaGeneratorHooks {
                 override fun willGenerateGraphQLType(type: KType): GraphQLType? =
                     when (type.classifier) {
                         java.time.LocalDate::class -> ExtendedScalars.Date
                         java.time.OffsetDateTime::class -> ExtendedScalars.DateTime
+                        Long::class -> ExtendedScalars.GraphQLLong
                         else -> null
                     }
             }

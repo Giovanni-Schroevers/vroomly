@@ -74,7 +74,7 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
     }
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun update(email: String, input: EditInput): User {
+    override suspend fun update(userId: Int, input: EditInput): User {
         var updated: User? = null
         transaction(database) {
             val result: ResultRow? = UsersTable.updateReturning(
@@ -89,7 +89,7 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
                     UsersTable.DateOfBirth,
                     UsersTable.CreationDate,
                 ),
-                where = { UsersTable.Email eq email }
+                where = { UsersTable.Id eq userId }
             ) {
                 if (input.username != null) it[Username] = input.username
                 if (input.password != null) it[Password] = hash(input.password)
@@ -100,7 +100,7 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
             }.singleOrNull()
 
             if (result == null) {
-                error("User with Email '$email' not found")
+                error("User with Id '$userId' not found")
             } else {
                 updated = User(
                     result[UsersTable.Username],

@@ -36,4 +36,11 @@ class RepositoryFactory(
             else -> throw NotImplementedError("No ReservationRepository implementation available for database $database")
         }
     }
+
+    fun createDrivingReportRepository(): DrivingReportRepository {
+        return when (database) {
+            "PostgreSQL" -> PostgresDrivingReportRepository(jdbc, databaseUser, databasePassword)
+            else -> throw NotImplementedError("No ReservationRepository implementation available for database $database")
+        }
+    }
 }

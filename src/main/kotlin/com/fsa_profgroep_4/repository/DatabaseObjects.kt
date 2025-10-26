@@ -19,6 +19,7 @@ object VehicleModelTable : Table("dbo.vehicle_model") {
     val Category = varchar("category", 50)
     val Seats = integer("seats")
     val EngineTypeId = integer("engine_type_id").references(EngineTypeTable.Id)
+    val ZeroToHundred = double("zero_to_hundred")
     override val primaryKey = PrimaryKey(Id)
 }
 
@@ -118,5 +119,19 @@ object MaintenanceTable : Table("dbo.maintenance") {
     val Cost = decimal("cost", 10, 2)
     val Description = text("description")
     override val primaryKey = PrimaryKey(Id)
+}
+
+object DrivingReportTable : Table("dbo.driving_report") {
+    val Id = integer("id").autoIncrement()
+    val SafetyScore = double("safety_score")
+    val ReservationId = reference("reservation_id", ReservationTable.Id)
+    val Date = date("date")
+}
+
+object ViolationTable : Table("dbo.violation") {
+    val Id = integer("id").autoIncrement()
+    val Description = varchar("description", 255)
+    val Score = double("score")
+    val DrivingReportId = reference("driving_report_id", DrivingReportTable.Id)
 }
 

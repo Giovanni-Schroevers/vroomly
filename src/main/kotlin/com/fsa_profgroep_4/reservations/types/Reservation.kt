@@ -24,6 +24,29 @@ data class Reservation @OptIn(ExperimentalTime::class) constructor(
     val vehicleId: Int,
     @param:GraphQLDescription("Reservation id of vehicle renter")
     val renterId: Int,
+    @param:GraphQLDescription("Driving reports of the reservation")
+    val drivingReports: List<DrivingReport>? = null
+)
+
+@GraphQLDescription("Driving report data")
+data class DrivingReport(
+    @param:GraphQLDescription("Driving report unique id")
+    val id: Int,
+    @param:GraphQLDescription("Driving report safety score")
+    val safetyScore: Double,
+    @param:GraphQLDescription("Driving report date")
+    val date: LocalDate,
+    @param:GraphQLDescription("Violations during the drive")
+    val violations: List<Violation>?
+)
+
+data class Violation(
+    @param:GraphQLDescription("Violation unique id")
+    val id: Int,
+    @param:GraphQLDescription("Violation description")
+    val description: String,
+    @param:GraphQLDescription("Violation score deduction")
+    val score: Double
 )
 
 @GraphQLDescription("Reservation data used for updating existing reservation entries")

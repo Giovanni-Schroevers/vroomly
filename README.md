@@ -55,12 +55,12 @@ If the server starts successfully, you'll see the following output:
 
 ### User resolvers
 
-| Operation    | Query/Mutation | Description                                      | Parameters                                         |
-|--------------|----------------|--------------------------------------------------|----------------------------------------------------|
-| login        | Query          | Login using existing user details                | `input: LoginInput`                                |
-| registerUser | Mutation       | Register as a user with new unique login details | `input: RegisterInput`                             |
-| editUser     | Mutation       | Edit user details                                | `input: EditInput`, `env: DataFetchingEnvironment` |
-| deleteUser   | mutation       | Deletes a user                                   | `env: DataFetchingEnvironment`                     |
+| Operation    | Query/Mutation | Description                                      | Parameters             |
+|--------------|----------------|--------------------------------------------------|------------------------|
+| login        | Query          | Login using existing user details                | `input: LoginInput`    |
+| registerUser | Mutation       | Register as a user with new unique login details | `input: RegisterInput` |
+| editUser     | Mutation       | Edit user details                                | `input: EditInput`     |
+| deleteUser   | mutation       | Deletes a user                                   |                        |
 
 
 ### Reservation resolvers
@@ -73,3 +73,9 @@ If the server starts successfully, you'll see the following output:
 | getReservationByRenterId   | Query          | Get all reservations from a renter          | `renterId: Int`                                                                 |
 | updateReservation          | Query          | Update a specific reservation               | `input: ReservationUpdate`                                                      |
 | deleteReservation          | Query          | Delete a specific reservation               | `reservationId: Int`                                                            |
+
+### Driving report resolvers
+
+| Operation         | Query/Mutation | Description                                      | Parameters                  |
+|-------------------|----------------|--------------------------------------------------|-----------------------------|
+| saveDrivingReport | Mutation       | Saves the safety score and violations of a drive | `input: DrivingReportInput` |

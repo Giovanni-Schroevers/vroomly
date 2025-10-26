@@ -46,9 +46,12 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                     val vehicleModelId = VehicleModelTable
                         .selectAll()
                         .where {
-                            (VehicleModelTable.Brand eq vehicle.brand) and
-                                    (VehicleModelTable.Model eq vehicle.model) and
-                                    (VehicleModelTable.Year eq vehicle.year)
+                            (VehicleModelTable.Brand eq (vehicle.brand)) and
+                                    (VehicleModelTable.Model eq (vehicle.model)) and
+                                    (VehicleModelTable.Year eq (vehicle.year)) and
+                                    (VehicleModelTable.Color eq (vehicle.color)) and
+                                    (VehicleModelTable.ZeroToHundred eq (vehicle.zeroToHundred)) and
+                                    (VehicleModelTable.Seats eq (vehicle.seats))
                         }
                         .firstOrNull()?.get(VehicleModelTable.Id)
                         ?: run {
@@ -229,54 +232,46 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                         // Use existing engine type
                         VehicleModelTable
                             .selectAll()
-                            .where { VehicleModelTable.Id eq vehicle.id }
+                            .where { VehicleModelTable.Id eq existingVehicle.vehicleModelId!! }
                             .firstOrNull()?.get(VehicleModelTable.EngineTypeId)
                             ?: throw IllegalStateException("Failed to retrieve existing EngineType for VehicleModel ID ${existingVehicle.vehicleModelId}")
                     }
 
                     // --- VEHICLE MODEL ---
-                    val vehicleModelId = existingVehicle.vehicleModelId ?: run {
-                        VehicleModelTable
-                            .selectAll()
-                            .where {
-                                (VehicleModelTable.Brand eq (vehicle.brand ?: existingVehicle.brand)) and
-                                        (VehicleModelTable.Model eq (vehicle.model ?: existingVehicle.model)) and
-                                        (VehicleModelTable.Year eq (vehicle.year ?: existingVehicle.year))
-                            }
-                            .firstOrNull()?.get(VehicleModelTable.Id)
-                            ?: run {
-                                val insertStmt = VehicleModelTable.insert {
-                                    it[Brand] = vehicle.brand ?: existingVehicle.brand
-                                    it[Model] = vehicle.model ?: existingVehicle.model
-                                    it[Year] = vehicle.year ?: existingVehicle.year
-                                    it[Category] = (vehicle.category ?: existingVehicle.category).name
-                                    it[ZeroToHundred] = vehicle.zeroToHundred ?: existingVehicle.zeroToHundred
-                                    it[Seats] = vehicle.seats ?: existingVehicle.seats
-                                    it[EngineTypeId] = engineTypeId
-                                }
-                                insertStmt.resultedValues?.firstOrNull()?.get(VehicleModelTable.Id)
-                                    ?: throw IllegalStateException("Failed to insert or retrieve VehicleModel.")
-                            }
-                    }
-
-                    // Update existing VehicleModel if it matches
-                    if(vehicleModelId == existingVehicle.vehicleModelId){
-                        VehicleModelTable.update(where = { VehicleModelTable.Id eq vehicleModelId }) {
-                            it[Brand] = vehicle.brand ?: existingVehicle.brand
-                            it[Model] = vehicle.model ?: existingVehicle.model
-                            it[Year] = vehicle.year ?: existingVehicle.year
-                            it[Category] = (vehicle.category ?: existingVehicle.category).name
-                            it[Seats] = vehicle.seats ?: existingVehicle.seats
-                            it[EngineTypeId] = engineTypeId
+                    val vehicleModelId = VehicleModelTable
+                        .selectAll()
+                        .where {
+                            (VehicleModelTable.Brand eq (vehicle.brand ?: existingVehicle.brand)) and
+                                    (VehicleModelTable.Model eq (vehicle.model ?: existingVehicle.model)) and
+                                    (VehicleModelTable.Year eq (vehicle.year ?: existingVehicle.year)) and
+                                    (VehicleModelTable.Color eq (vehicle.color ?: existingVehicle.color)) and
+                                    (VehicleModelTable.ZeroToHundred eq (vehicle.zeroToHundred ?: existingVehicle.zeroToHundred)) and
+                                    (VehicleModelTable.Seats eq (vehicle.seats ?: existingVehicle.seats))
                         }
-                    }
+                        .firstOrNull()?.get(VehicleModelTable.Id)
+                        ?: run {
+                            val insertStmt = VehicleModelTable.insert {
+                                it[Brand] = vehicle.brand ?: existingVehicle.brand
+                                it[Model] = vehicle.model ?: existingVehicle.model
+                                it[Year] = vehicle.year ?: existingVehicle.year
+                                it[Color] = vehicle.color ?: existingVehicle.color
+                                it[Category] = (vehicle.category ?: existingVehicle.category).name
+                                it[ZeroToHundred] = vehicle.zeroToHundred ?: existingVehicle.zeroToHundred
+                                it[Seats] = vehicle.seats ?: existingVehicle.seats
+                                it[EngineTypeId] = engineTypeId
+                            }
+                            val returned = insertStmt.resultedValues?.firstOrNull()
+                            returned?.get(VehicleModelTable.Id)
+                                ?: throw IllegalStateException("Failed to insert or retrieve VehicleModel '${vehicle.brand} ${vehicle.model} ${vehicle.year}'")
+                        }
 
                     // --- VEHICLE ---
-                    VehicleTable.update({ VehicleTable.Id eq vehicle.id }) {
+                    VehicleTable.update({ VehicleTable.Id eq existingVehicle.id!! }) {
                         vehicle.licensePlate?.let { lp -> it[LicensePlate] = lp }
                         vehicle.status?.let { st -> it[Status] = st.name }
                         vehicle.vin?.let { vin -> it[Vin] = vin }
                         vehicle.ownerId?.let { owner -> it[OwnerId] = owner }
+                        vehicle.costPerDay?.let { costpd -> it[CostPerDay] = costpd }
                         it[VehicleModelId] = vehicleModelId
                     }
 
@@ -341,13 +336,6 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
 
             if (rowsDeleted == 0) {
                 throw IllegalStateException("Failed to delete vehicle with ID $vehicleId — not found or already deleted.")
-            }
-
-            VehicleModelTable.deleteWhere {
-                (VehicleModelTable.Brand eq vehicle.brand) and
-                        (VehicleModelTable.Model eq vehicle.model) and
-                        (VehicleModelTable.Year eq vehicle.year) and
-                        (VehicleModelTable.Seats eq vehicle.seats)
             }
 
             vehicle

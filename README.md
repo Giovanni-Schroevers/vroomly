@@ -3,8 +3,8 @@
 ## Installation
 1. Use git clone, or install the zip to get the application on your device.
 2. Copy the `.env.example` and name it `.env`. Make sure to fill in the environment variables.
-3. Run `./gradlew` build to make sure everything builds properly.
-4. Run `./gradlew` run to start running the application (refer to [Building & Running](https://github.com/Giovanni-Schroevers/vroomly?tab=readme-ov-file#building--running) for other operations.)
+3. Run `./gradlew build` to make sure everything builds properly.
+4. Run `./gradlew run` to start running the application (refer to [Building & Running](https://github.com/Giovanni-Schroevers/vroomly?tab=readme-ov-file#building--running) for other operations.)
 5. When running locally, open the [GraphiQL playground](http://127.0.0.1:5000/playground).
 6. You may refer to the [GraphQL queries](http://127.0.0.1:5000/playground) for all possible queries.
 

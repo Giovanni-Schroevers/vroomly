@@ -7,4 +7,5 @@ interface UserRepository {
     suspend fun findByCredentials(email: String, password: String): User?
     suspend fun register(user: User): User
     suspend fun update(userId: Int, input: EditInput): User
+    suspend fun delete(userId: Int)
 }

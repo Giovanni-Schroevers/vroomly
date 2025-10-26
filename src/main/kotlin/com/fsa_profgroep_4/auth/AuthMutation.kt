@@ -69,4 +69,13 @@ class AuthMutation(private val userRepository: UserRepository): Mutation {
 
         return EditResponse(user = userResponse)
     }
+
+    suspend fun deleteUser(env: DataFetchingEnvironment): String {
+        val token = requirePrincipal(env)
+        val id = token.payload.getClaim("id").asInt()
+
+        userRepository.delete(id)
+
+        return "User with id $id has been deleted"
+    }
 }

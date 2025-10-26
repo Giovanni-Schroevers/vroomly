@@ -117,4 +117,10 @@ class PostgresUserRepository(jdbc: String, user: String, password: String) : Use
         }
         return updated!!
     }
+
+    override suspend fun delete(userId: Int) {
+        transaction(database) {
+            UsersTable.deleteWhere { UsersTable.Id eq userId }
+        }
+    }
 }

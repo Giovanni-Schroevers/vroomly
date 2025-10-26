@@ -34,7 +34,7 @@ If the server starts successfully, you'll see the following output:
 
 ## GraphQL resolvers
 
-### Vehicle queries
+### Vehicle resolvers
 | Operation              | Query/Mutation | Description                                                          | Parameters                                                                                 |
 |------------------------|----------------|----------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
 | getAllVehicles         | Query          | Get all registered vehicles                                          | `n/a`                                                                                      |

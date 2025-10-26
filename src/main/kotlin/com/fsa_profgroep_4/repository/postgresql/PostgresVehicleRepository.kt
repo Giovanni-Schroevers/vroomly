@@ -79,6 +79,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                             it[Longitude] = vehicle.location.longitude
                             it[Latitude] = vehicle.location.latitude
                             it[Address] = vehicle.location.address
+                            it[CostPerDay] = vehicle.costPerDay
                         }
 
                         val returned = insertStmt.resultedValues?.firstOrNull()
@@ -414,7 +415,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         color = row[VehicleModelTable.Color],
         status = VehicleStatus.valueOf(row[VehicleTable.Status]),
         category = VehicleCategory.valueOf(row[VehicleModelTable.Category]),
-        costPerDay = 0.0,
+        costPerDay = row[VehicleTable.CostPerDay],
         engineType = EngineType.valueOf(row[EngineTypeTable.Code]),
         reviewStars = row[VehicleTable.ReviewStars],
         vehicleModelId = row[VehicleModelTable.Id],

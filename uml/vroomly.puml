@@ -6,10 +6,10 @@ left to right direction
 '========================
 ' Core domain
 '========================
-abstract class Vehicle {
-  # year: String
+class Vehicle {
   # brand: String
   # model: String
+  # year: String
   # licensePlate: String
   # vin: String
   # MOTValidTill: Date
@@ -19,87 +19,72 @@ abstract class Vehicle {
   # status: VehicleStatus
   # category: VehicleCategory
   # costPerDay: Double
-'  Replace for interface
-  - createdAt: DateTime
-  {derived} - isRentable: Boolean
-  + reserve(renter: User, start: Date, end: Date): Reservation
-  + addMaintenance(m: Maintenance): Boolean
-  + isAvailable(start: Date, end: Date): Boolean
-  + remove(): Boolean
+  # engineType: EngineType
+  # zeroToHundred: Double
+  # reviewStars: Double
 }
 
-class Car {
-  - type: EngineType
-}
-
-class Maintenance {
-  - startDate: Date
-  - endDate: Date
-  - cost: Double
-  - description: String
-  - odometerAtService: Double
-  + getMaintenanceDetails(): Object
+class VehicleTcoData {
+  # acquisitionCost: Double
+  # currentMarketValue: Double
+  # maintenanceCosts: Double
+  # fuelConsumptionPer100Km: Double
+  # fuelPricePerLiter: Double
+  # insuranceCostsPerYear: Double
+  # taxAndRegistrationPerYear: Double
+  # yearsOwned: Int
 }
 
 class Reservation {
-  # startDate: Date
-  # endDate: Date
+  # startDate: LocalDate
+  # endDate: LocalDate
   # totalCost: Double
   # status: ReservationStatus
-  - paid: Boolean
-'  Replace for interface
-  - createdAt: DateTime
-  + payReservation(): Boolean
-  + cancelReservation(): Boolean
+  # totalCost: Double
+  # paid: Boolean
+  # createdAt: LocalDate
+}
+
+class DrivingReport {
+  # safetyScore: Double
+  # date: LocalDate
+}
+
+class Violation {
+  # description: String
+  # score: Double
 }
 
 class User {
-  - firstName: String
-  - middleName: String
-  - lastName: String
-  - dob: Date
-  - userName: String
-  - password: String
-'  Replace for interface
-  - accountCreatedAt: DateTime
-  - email: String
-  + login(): String
-  + resetPassword(): Boolean
-  + removeAccount(): Boolean
+  # userName: String
+  # email: String
+  # firstName: String
+  # middleName: String
+  # lastName: String
+  # dateOfBirth: Date
+  # password: String
+  # createdAt: Instant
 }
 
-class Image {
-  - source: String
-  - caption: String
-  - createdAt: DateTime
+class VehicleImage {
+  - url: String
+  - number: Int
 }
 
-interface iLocatable {
+class VehicleLocation {
   + latitude: Decimal
   + longitude: Decimal
-}
-
-interface iCreatedAt {
-    createdAt: DateTime
-}
-
-class RentableVehicles <<service>> {
-  + getVehicles(filters): List<Vehicle>
-}
-
-class Location {
-  + latitude: Decimal
-  + longitude: Decimal
-  - address: String
+  + address: String
 }
 
 '========================
 ' Enums
 '========================
 enum EngineType {
-  ICE
-  BEV
-  FCEV
+  PETROL
+  DIESEL
+  ELECTRIC
+  HYBRID
 }
 
 enum VehicleStatus {
@@ -109,10 +94,14 @@ enum VehicleStatus {
 }
 
 enum VehicleCategory {
-  Car
-  Van
-  Truck
+  SEDAN
   SUV
+  HATCHBACK
+  CONVERTIBLE
+  COUPE
+  WAGON
+  VAN
+  TRUCK
 }
 
 enum ReservationStatus {
@@ -126,26 +115,24 @@ enum ReservationStatus {
 '========================
 ' Associations (lines)
 '========================
-Car --|> Vehicle
-Car ..> EngineType : type
-
-Vehicle *-- "0..*" Maintenance : maintenances
 Vehicle o-- "0..*" Reservation : reservations
-Vehicle o-- "0..*" Image : images
+Vehicle o-- "0..*" VehicleImage : images
 Vehicle --> "1" User : owner
-Vehicle ..|> iLocatable
-Vehicle --> "0..1" Location : currentLocation
+Vehicle --> "1" VehicleLocation : currentLocation
+Vehicle *-- "0..1" VehicleTcoData : TCO
 
 Reservation --> "1" Vehicle : vehicle
 Reservation --> "1" User : renter
+Reservation *-- "0..*" DrivingReport : drivingReports
 
-RentableVehicles ..> Car : queries
+DrivingReport *-- "0..*" Violation: violations
 
 '========================
 ' Enum dependencies (lines from classes to enums)
 '========================
 Vehicle ..> VehicleStatus : status
 Vehicle ..> VehicleCategory : category
+Vehicle ..> EngineType : engineType
 Reservation ..> ReservationStatus : status
 
 @enduml

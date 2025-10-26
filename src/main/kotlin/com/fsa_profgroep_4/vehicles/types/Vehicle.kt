@@ -82,8 +82,6 @@ data class VehicleUpdate (
     val zeroToHundred: Double?,
     @param:GraphQLDescription("Vehicle's engine type")
     val engineType: EngineType?,
-    @param:GraphQLDescription("Vehicle's 0-100 time")
-    val zeroToHundred: Double?,
     // TODO: Add reviewStars to UML
     @param:GraphQLDescription("Average review stars for this vehicle")
     val reviewStars: Double?,

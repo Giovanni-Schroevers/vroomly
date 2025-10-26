@@ -86,7 +86,7 @@ data class VehicleUpdate (
     @param:GraphQLDescription("Vehicle model's unique id")
     val vehicleModelId: Int?, // The only reason this is here is to link Vehicle to VehicleModel in the DB and avoid extra queries
     @param:GraphQLDescription("Vehicle's location")
-    val location: VehicleLocation
+    val location: VehicleLocation?
 )
 
 @GraphQLDescription("Types of vehicle status")

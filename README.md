@@ -1,4 +1,5 @@
-# vroomly
+# Vroomly
+Vroomly is a peer-to-peer car rental platform where car owner can rent out their car to other people.
 
 ## Installation
 1. Use git clone, or install the zip to get the application on your device.

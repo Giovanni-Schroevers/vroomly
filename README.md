@@ -7,7 +7,7 @@ Vroomly is a peer-to-peer car rental platform where car owner can rent out their
 3. Run `./gradlew build` to make sure everything builds properly.
 4. Run `./gradlew run` to start running the application (refer to [Building & Running](https://github.com/Giovanni-Schroevers/vroomly?tab=readme-ov-file#building--running) for other operations.)
 5. When running locally, open the [GraphiQL playground](http://127.0.0.1:5000/playground).
-6. You may refer to the [GraphQL queries](https://github.com/Giovanni-Schroevers/vroomly?tab=readme-ov-file#graphql-queries) for all possible queries.
+6. You may refer to the [GraphQL resolvers](https://github.com/Giovanni-Schroevers/vroomly?tab=readme-ov-file#graphql-queries) for all possible queries.
 
 
 ## Building & Running
@@ -32,7 +32,7 @@ If the server starts successfully, you'll see the following output:
 2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
 ```
 
-## GraphQL queries
+## GraphQL resolvers
 
 ### Vehicle queries
 | Operation              | Query/Mutation | Description                                                          | Parameters                                                                                 |
@@ -53,7 +53,7 @@ If the server starts successfully, you'll see the following output:
 | updateVehicleTcoData   | Mutation       | Update vehicle's TCO data                                            | `input: VehicleTcoDataInput`                                                               |
 
 
-### User queries
+### User resolvers
 
 | Operation    | Query/Mutation | Description                                      | Parameters                                         |
 |--------------|----------------|--------------------------------------------------|----------------------------------------------------|
@@ -63,7 +63,7 @@ If the server starts successfully, you'll see the following output:
 | deleteUser   | mutation       | Deletes a user                                   | `env: DataFetchingEnvironment`                     |
 
 
-### Reservation queries
+### Reservation resolvers
 
 | Operation                  | Query/Mutation | Description                                 | Parameters                                                                      |
 |----------------------------|----------------|---------------------------------------------|---------------------------------------------------------------------------------|

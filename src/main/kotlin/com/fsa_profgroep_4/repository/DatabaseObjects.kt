@@ -30,6 +30,9 @@ object VehicleTable : Table("dbo.vehicle") {
     val Vin = varchar("vin", 20).uniqueIndex()
     val ReviewStars = double("review_stars")
     val VehicleModelId = reference("vehicle_model_id", VehicleModelTable.Id)
+    val longitude = double("longitude")
+    val latitude = double("latitude")
+    val address = varchar("address", 255)
 
     val OwnerId = reference(
         "owner_id",

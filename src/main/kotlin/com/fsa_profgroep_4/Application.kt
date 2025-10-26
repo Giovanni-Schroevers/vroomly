@@ -5,7 +5,6 @@ import com.expediagroup.graphql.server.ktor.*
 import com.fsa_profgroep_4.auth.AuthMutation
 import com.fsa_profgroep_4.auth.AuthQuery
 import com.fsa_profgroep_4.driving_report.DrivingReportMutation
-import com.fsa_profgroep_4.example.ExampleQuery
 import com.fsa_profgroep_4.reservations.ReservationsQuery
 import com.fsa_profgroep_4.vehicles.VehiclesMutation
 import com.fsa_profgroep_4.vehicles.VehiclesQuery
@@ -66,7 +65,6 @@ fun Application.graphQLModule(){
         schema {
             packages = listOf("com.fsa_profgroep_4")
             queries = listOf(
-                ExampleQuery(),
                 AuthQuery(environment),
                 ReservationsQuery(environment),
                 VehiclesQuery(environment)

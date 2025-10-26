@@ -431,7 +431,12 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                         number = imageRow[VehicleImageTable.Number]
                     )
                 }
-        }
+        },
+        location = VehicleLocation(
+            row[VehicleTable.longitude],
+            row[VehicleTable.latitude],
+            row[VehicleTable.address]
+        )
     )
 
     override fun getVehicleTcoData(vehicleId: Int): VehicleTcoData? = transaction {

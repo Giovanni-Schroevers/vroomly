@@ -7,7 +7,6 @@ data class Vehicle (
     val id: Int? = null,
     @param:GraphQLDescription("Vehicle owner's unique id")
     val ownerId: Int,
-    // TODO add id and owner id to UML
     @param:GraphQLDescription("Vehicle's brand")
     val brand: String,
     @param:GraphQLDescription("Vehicle's model")
@@ -38,11 +37,12 @@ data class Vehicle (
     val zeroToHundred: Double,
     @param:GraphQLDescription("Vehicle images")
     val images: List<VehicleImage>,
-    // TODO: Add reviewStars to UML
     @param:GraphQLDescription("Average review stars for this vehicle")
     val reviewStars: Double,
     @param:GraphQLDescription("Vehicle model's unique id")
-    val vehicleModelId: Int? // The only reason this is here is to link Vehicle to VehicleModel in the DB and avoid extra queries
+    val vehicleModelId: Int?, // The only reason this is here is to link Vehicle to VehicleModel in the DB and avoid extra queries
+    @param:GraphQLDescription("Vehicle's location")
+    val location: VehicleLocation
 )
 
 @GraphQLDescription("Vehicle data used for updating existing vehicle entries")
@@ -51,7 +51,6 @@ data class VehicleUpdate (
     val id: Int,
     @param:GraphQLDescription("Vehicle owner's unique id")
     val ownerId: Int?,
-    // TODO add id and owner id to UML
     @param:GraphQLDescription("Vehicle's brand")
     val brand: String?,
     @param:GraphQLDescription("Vehicle's model")
@@ -82,11 +81,12 @@ data class VehicleUpdate (
     val zeroToHundred: Double?,
     @param:GraphQLDescription("Vehicle's engine type")
     val engineType: EngineType?,
-    // TODO: Add reviewStars to UML
     @param:GraphQLDescription("Average review stars for this vehicle")
     val reviewStars: Double?,
     @param:GraphQLDescription("Vehicle model's unique id")
-    val vehicleModelId: Int? // The only reason this is here is to link Vehicle to VehicleModel in the DB and avoid extra queries
+    val vehicleModelId: Int?, // The only reason this is here is to link Vehicle to VehicleModel in the DB and avoid extra queries
+    @param:GraphQLDescription("Vehicle's location")
+    val location: VehicleLocation
 )
 
 @GraphQLDescription("Types of vehicle status")
@@ -110,7 +110,15 @@ data class VehicleConsumption(
     val costPerKm: Double
 )
 
-// TODO: Change the UML to match this VehicleCategory enum
+data class VehicleLocation(
+    @param:GraphQLDescription("Vehicles longitude coordinate")
+    val longitude: Double,
+    @param:GraphQLDescription("Vehicles latitude coordinate")
+    val latitude: Double,
+    @param:GraphQLDescription("Vehicles address")
+    val address: String
+)
+
 enum class VehicleCategory {
     SEDAN,
     SUV,
@@ -122,7 +130,6 @@ enum class VehicleCategory {
     TRUCK
 }
 
-// TODO: Change the UML to match this EngineType enum
 enum class EngineType {
     PETROL,
     DIESEL,

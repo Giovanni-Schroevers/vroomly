@@ -3,6 +3,7 @@ package com.fsa_profgroep_4.vehicles
 import com.fsa_profgroep_4.vehicles.types.EngineType
 import com.fsa_profgroep_4.vehicles.types.Vehicle
 import com.fsa_profgroep_4.vehicles.types.VehicleCategory
+import com.fsa_profgroep_4.vehicles.types.VehicleLocation
 import com.fsa_profgroep_4.vehicles.types.VehicleStatus
 import com.fsa_profgroep_4.vehicles.types.VehicleTcoData
 import java.time.LocalDate
@@ -39,7 +40,12 @@ object VehicleHelper {
                 reviewStars = listOf(3.5, 4.0, 4.5, 5.0).random(),
                 year = (2000..2025).random(),
                 zeroToHundred = (6..12).random().toDouble(),
-                vehicleModelId = null // This doesn't need to be set for generating vehicles
+                vehicleModelId = null, // This doesn't need to be set for generating vehicles
+                location = VehicleLocation(
+                    (0..30).random().toDouble(),
+                    (0..30).random().toDouble(),
+                    "Test straat 20"
+                )
             )
         }
     }

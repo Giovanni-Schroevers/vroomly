@@ -2,7 +2,6 @@ package com.fsa_profgroep_4.vehicles.types
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 
-// TODO: Add VehicleImage class in UML
 @GraphQLDescription("Images associated with vehicles")
 data class VehicleImage (
     @param:GraphQLDescription("Image's unique id")

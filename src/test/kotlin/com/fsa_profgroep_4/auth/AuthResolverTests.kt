@@ -17,7 +17,7 @@ import java.time.LocalDate
 import kotlin.time.ExperimentalTime
 
 @DisplayName("Auth Tests")
-class AuthResolversTest {
+class AuthResolverTests {
     private lateinit var sharedRepo: InMemoryUserRepository
     private lateinit var mutation: AuthMutation
     private lateinit var query: AuthQuery
@@ -52,11 +52,11 @@ class AuthResolversTest {
             var id: Int = 1
         )
 
-        private val users = mutableMapOf<String, MemoryUser>()
+        private val users = mutableListOf<MemoryUser>()
 
         @OptIn(ExperimentalTime::class)
         override suspend fun findByCredentials(email: String, password: String): User? {
-            val u = users[email] ?: return null
+            val u = users.find { it.email == email } ?: return null
             if (!verify(u.passwordHash, password)) return null
             return User(u.username, u.email, u.passwordHash, u.firstname, u.middleName, u.lastname, u.dob, u.id)
         }
@@ -73,13 +73,13 @@ class AuthResolversTest {
                 dob = user.dateOfBirth,
                 id = users.size + 1
             )
-            users[user.email] = createdUser
+            users.add(createdUser)
             return user.copy(id = createdUser.id, password = createdUser.passwordHash)
         }
 
         @OptIn(ExperimentalTime::class)
-        override suspend fun update(email: String, input: EditInput): User {
-            val u = users[email] ?: error("User with email '$email' not found")
+        override suspend fun update(userId: Int, input: EditInput): User {
+            val u = users.find { it.id == userId } ?: error("User with id '$userId' not found")
             if (input.username != null) u.username = input.username
             if (input.password != null) u.passwordHash = hash(input.password)
             if (input.firstname != null) u.firstname = input.firstname
@@ -88,11 +88,15 @@ class AuthResolversTest {
             if (input.dob != null) u.dob = input.dob
             return User(u.username, u.email, u.passwordHash, u.firstname, u.middleName, u.lastname, u.dob, u.id)
         }
+
+        override suspend fun delete(userId: Int) {
+            users.removeIf { it.id == userId }
+        }
     }
 
-    private fun envWithPrincipal(email: String): DataFetchingEnvironment {
+    private fun envWithPrincipal(id: Int): DataFetchingEnvironment {
         val token = JWT.create()
-            .withClaim("email", email)
+            .withClaim("id", id)
             .sign(Algorithm.HMAC256("secret"))
         val principal = JWTPrincipal(JWT.decode(token))
 
@@ -176,7 +180,7 @@ class AuthResolversTest {
     @Test
     @DisplayName("Editing a user without data should throw an exception")
     fun editUserFailNoFields() = runTest {
-        val env = envWithPrincipal("test@student.avans.nl")
+        val env = envWithPrincipal(1)
 
         try {
             mutation.editUser(EditInput(), env)
@@ -191,7 +195,7 @@ class AuthResolversTest {
     @Test
     @DisplayName("Editing a user with invalid data should throw an exception")
     fun editUserFailInvalidFields() = runTest {
-        val env = envWithPrincipal("test@student.avans.nl")
+        val env = envWithPrincipal(1)
 
         try {
             mutation.editUser(EditInput(password = "123"), env)
@@ -208,11 +212,20 @@ class AuthResolversTest {
     @Test
     @DisplayName("Editing a user with valid data should succeed")
     fun editUserSuccess() = runTest {
-        val env = envWithPrincipal("test@student.avans.nl")
+        val env = envWithPrincipal(1)
 
         val result = mutation.editUser(EditInput(firstname = "Updated", lastname = "Updated"), env)
         assertEquals("test@student.avans.nl", result.user.email)
         assertEquals("Updated", result.user.firstname)
         assertEquals("Updated", result.user.lastname)
+    }
+
+    @Test
+    @DisplayName("Deleting a user should succeed")
+    fun deleteUserSuccess() = runTest {
+        val env = envWithPrincipal(1)
+
+        val result = mutation.deleteUser(env)
+        assertEquals("User with id 1 has been deleted", result)
     }
 }

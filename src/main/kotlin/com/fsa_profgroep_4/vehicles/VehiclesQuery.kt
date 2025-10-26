@@ -195,9 +195,9 @@ class VehiclesQuery(
      *
      * @return a list of [Vehicle] objects.
      */
-    suspend fun seedVehicleData(amountToSeed: Int): List<Vehicle>{
+    suspend fun seedVehicleData(amountToSeed: Int, ownerId: Int): List<Vehicle>{
         val repository = vehicleRepository
-        return vehicleService.vehicleDataSeeder(repository, amountToSeed)
+        return vehicleService.vehicleDataSeeder(repository, amountToSeed, ownerId)
     }
 
 }

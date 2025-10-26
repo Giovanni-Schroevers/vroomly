@@ -196,10 +196,10 @@ class VehicleService {
     return basics
     }
 
-    suspend fun vehicleDataSeeder(repository: VehicleRepository, amountToSeed: Int): List<Vehicle> {
+    suspend fun vehicleDataSeeder(repository: VehicleRepository, amountToSeed: Int, ownerId: Int): List<Vehicle> {
         val addedVehicles = mutableListOf<Vehicle>()
 
-        VehicleHelper.generateVehicles(amountToSeed).forEach { vehicle ->
+        VehicleHelper.generateVehicles(amountToSeed, ownerId).forEach { vehicle ->
             semaphoreBulk.withPermit {
                 println(vehicle)
                 val savedVehicle = repository.saveVehicle(vehicle)

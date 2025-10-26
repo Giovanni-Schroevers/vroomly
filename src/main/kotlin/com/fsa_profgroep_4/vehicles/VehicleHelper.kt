@@ -8,7 +8,7 @@ import com.fsa_profgroep_4.vehicles.types.VehicleTcoData
 import java.time.LocalDate
 
 object VehicleHelper {
-    fun generateVehicles(count: Int = 10): List<Vehicle> {
+    fun generateVehicles(count: Int = 10, ownerId: Int): List<Vehicle> {
         val brands = listOf("Toyota", "Volkswagen", "BMW", "Audi", "Mercedes", "Ford", "Honda", "Nissan", "Kia", "Hyundai")
         val models = listOf("Corolla", "Golf", "3 Series", "A4", "C-Class", "Focus", "Civic", "Altima", "Sportage", "i30")
         val colors = listOf("Silver", "White", "Black", "Blue", "Red", "Grey", "Green")
@@ -16,7 +16,6 @@ object VehicleHelper {
 
         return (1..count).map { index ->
             val status = statuses.random()
-            val ownerId = 3 // For simplicity, all vehicles belong to owner with ID 3
 
             Vehicle(
                 ownerId = ownerId,

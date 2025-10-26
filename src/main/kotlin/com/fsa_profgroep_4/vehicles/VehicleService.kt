@@ -1,7 +1,7 @@
 package com.fsa_profgroep_4.vehicles
 
-import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.fsa_profgroep_4.repository.VehicleRepository
+import com.fsa_profgroep_4.vehicles.VehicleHelper.generateVehicleTcoData
 import com.fsa_profgroep_4.vehicles.types.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -113,7 +113,7 @@ class VehicleService {
     private fun getTcoValue(data: VehicleTcoData, vehicle: Vehicle): TCO {
         val depreciation = data.acquisitionCost - data.currentMarketValue
 
-        val totalKmDriven = vehicle.odometerKm.toDouble()
+        val totalKmDriven = vehicle.odometerKm
         val fuelConsumed = (totalKmDriven / 100.0) * data.fuelConsumptionPer100Km
         val fuelCosts = fuelConsumed * data.fuelPricePerLiter
 
@@ -201,12 +201,30 @@ class VehicleService {
 
         VehicleHelper.generateVehicles(amountToSeed).forEach { vehicle ->
             semaphoreBulk.withPermit {
+                println(vehicle)
                 val savedVehicle = repository.saveVehicle(vehicle)
-                if (savedVehicle != null)
+                if (savedVehicle != null){
                     addedVehicles.add(savedVehicle)
+                    if (savedVehicle.id != null){
+                        println(generateVehicleTcoData(savedVehicle.id))
+                        repository.saveVehicleTcoData(generateVehicleTcoData(savedVehicle.id))
+                    }
+                }
+
             }
         }
 
         return addedVehicles
+    }
+
+    suspend fun vehicleDataCleaner(vehicleRepository: VehicleRepository): String {
+        semaphoreBulk.withPermit {
+            vehicleRepository.getAllVehicles().forEach { vehicle ->
+                if(vehicle.id != null){
+                    vehicleRepository.deleteVehicleById(vehicle.id)
+                }
+            }
+            return "Successfully cleaned the database"
+        }
     }
 }

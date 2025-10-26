@@ -7,6 +7,7 @@ import com.fsa_profgroep_4.vehicles.types.Vehicle
 import com.fsa_profgroep_4.vehicles.types.VehicleCategory
 import com.fsa_profgroep_4.vehicles.types.VehicleFilter
 import com.fsa_profgroep_4.vehicles.types.VehicleImage
+import com.fsa_profgroep_4.vehicles.types.VehicleLocation
 import com.fsa_profgroep_4.vehicles.types.VehicleStatus
 import com.fsa_profgroep_4.vehicles.types.VehicleTcoData
 import com.fsa_profgroep_4.vehicles.types.VehicleTcoDataInput
@@ -48,7 +49,8 @@ class VehicleResolverTests {
                 engineType = EngineType.DIESEL,
                 zeroToHundred = 10.0,
                 vehicleModelId = null,
-                reviewStars = 4.0
+                reviewStars = 4.0,
+                location = VehicleLocation(0.0, 0.0, "test straat 10")
             )
         )
 
@@ -90,7 +92,8 @@ class VehicleResolverTests {
                 engineType = EngineType.PETROL,
                 zeroToHundred = 9.0,
                 vehicleModelId = null,
-                reviewStars = 4.5
+                reviewStars = 4.5,
+                location = VehicleLocation(0.0, 0.0, "test straat 10")
             )
         )
         assertEquals(2, created.id)
@@ -138,7 +141,8 @@ class VehicleResolverTests {
                 engineType = EngineType.ELECTRIC,
                 zeroToHundred = 5.5,
                 vehicleModelId = null,
-                reviewStars = 5.0
+                reviewStars = 5.0,
+                location = VehicleLocation(0.0, 0.0, "test straat 10")
             )
         )
         val mine = query.getVehiclesByOwnerId(1)
@@ -180,7 +184,8 @@ class VehicleResolverTests {
                     engineType = EngineType.PETROL,
                     zeroToHundred = 8.0,
                     vehicleModelId = null,
-                    reviewStars = 4.0
+                    reviewStars = 4.0,
+                    location = VehicleLocation(0.0, 0.0, "test straat 10")
                 )
             )
         }
@@ -211,7 +216,8 @@ class VehicleResolverTests {
                 engineType = EngineType.PETROL,
                 zeroToHundred = 6.0,
                 vehicleModelId = null,
-                reviewStars = 4.0
+                reviewStars = 4.0,
+                location = VehicleLocation(0.0, 0.0, "test straat 10")
             )
         )
         query.createVehicle(
@@ -234,7 +240,8 @@ class VehicleResolverTests {
                 engineType = EngineType.PETROL,
                 zeroToHundred = 6.0,
                 vehicleModelId = null,
-                reviewStars = 4.0
+                reviewStars = 4.0,
+                location = VehicleLocation(0.0, 0.0, "test straat 10")
             )
         )
         val filters = VehicleFilter(brand = "BMW")
@@ -270,7 +277,7 @@ class VehicleResolverTests {
     @Test
     @DisplayName("seedVehicleData should create the requested number of vehicles")
     fun seedVehicleDataCreates() = runTest {
-        val seeded = query.seedVehicleData(3)
+        val seeded = query.seedVehicleData(3, 1)
         assertEquals(3, seeded.size)
         val all = query.getAllVehicles()
         assertTrue(all.size >= 4)
@@ -299,7 +306,8 @@ class VehicleResolverTests {
                 engineType = EngineType.DIESEL,
                 zeroToHundred = 9.5,
                 vehicleModelId = null,
-                reviewStars = 4.0
+                reviewStars = 4.0,
+                location = VehicleLocation(0.0, 0.0, "test straat 10")
             )
         )
         val input = VehicleTcoDataInput(
@@ -362,6 +370,7 @@ class VehicleResolverTests {
             zeroToHundred = 8.0,
             reviewStars = 4.0,
             vehicleModelId = 1,
+            location = VehicleLocation(0.0, 0.0, "test straat 10")
         )
         val updated = mutation.updateVehicle(
             data

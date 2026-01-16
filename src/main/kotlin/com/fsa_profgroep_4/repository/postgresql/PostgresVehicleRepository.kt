@@ -83,6 +83,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                             it[Latitude] = vehicle.location.latitude
                             it[Address] = vehicle.location.address
                             it[CostPerDay] = vehicle.costPerDay
+                            it[MotValidTill] = vehicle.motValidTill
                         }
 
                         val returned = insertStmt.resultedValues?.firstOrNull()
@@ -272,6 +273,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
                         vehicle.vin?.let { vin -> it[Vin] = vin }
                         vehicle.ownerId?.let { owner -> it[OwnerId] = owner }
                         vehicle.costPerDay?.let { costpd -> it[CostPerDay] = costpd }
+                        vehicle.motValidTill?.let { mot -> it[MotValidTill] = mot }
                         it[VehicleModelId] = vehicleModelId
                     }
 
@@ -397,7 +399,7 @@ class PostgresVehicleRepository(jdbc: String, user: String, password: String): V
         year = row[VehicleModelTable.Year],
         licensePlate = row[VehicleTable.LicensePlate],
         vin = row[VehicleTable.Vin],
-        motValidTill = "",
+        motValidTill = row[VehicleTable.MotValidTill],
         odometerKm = getLatestOdometer(row[VehicleTable.Id]),
         seats = row[VehicleModelTable.Seats],
         color = row[VehicleModelTable.Color],

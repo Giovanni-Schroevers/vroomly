@@ -34,6 +34,7 @@ object VehicleTable : Table("dbo.vehicle") {
     val Latitude = double("latitude")
     val Address = varchar("address", 255)
     val CostPerDay = double("cost_per_day")
+    val MotValidTill = varchar("mot_valid_till", 50)
 
     val OwnerId = reference(
         "owner_id",

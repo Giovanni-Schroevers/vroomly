@@ -40,7 +40,7 @@ class ReservationsQuery(
             endDate = endDate,
             renterId = renterId,
             vehicleId = vehicleId,
-            totalCost = ChronoUnit.DAYS.between(startDate, endDate) * vehicle.costPerDay,
+            totalCost = (ChronoUnit.DAYS.between(startDate, endDate) + 1) * vehicle.costPerDay,
             status = ReservationStatus.PENDING,
             paid = false,
             createdAt = LocalDate.now(),

@@ -31,6 +31,6 @@ class JwtService(
         .withAudience(jwtAudience)
         .withIssuer(jwtIssuer)
         .withClaim("id", id)
-        .withExpiresAt(Date(System.currentTimeMillis() + 3_600_000))
+        .withExpiresAt(Date(System.currentTimeMillis() + 86_400_000))
         .sign(Algorithm.HMAC256(jwtSecret))
 }
